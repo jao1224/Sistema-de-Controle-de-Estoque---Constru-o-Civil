@@ -1,16 +1,22 @@
-# 🏗️ Sistema de Controle de Estoque - Construção Civil
+# 🏗️ BuildStock
 
-Sistema simples e funcional para controlar estoque de materiais de construção civil com dashboard interativo.
+Sistema completo de controle de estoque para construção civil com dashboard interativo e gestão inteligente de materiais.
 
-## 📋 Funcionalidades
+## ✨ Funcionalidades
 
-- ✅ Registro de entradas e saídas de materiais
-- ✅ Dashboard com gráficos em tempo real
-- ✅ Estatísticas de estoque
-- ✅ Histórico de movimentações
-- ✅ Suporte a diferentes unidades (kg, m³, m², unidades, etc)
-- ✅ Controle por localização
-- ✅ Banco de dados SQLite
+- 📊 Dashboard interativo com gráficos em tempo real
+- ➕ Registro de entradas e saídas de materiais
+- 📈 Estatísticas e resumo do estoque
+- 📋 Histórico completo de movimentações
+- 📏 Suporte a múltiplas unidades (kg, m³, m², sacos, latas, etc)
+- 📍 Controle por localização (depósitos, obras)
+- ⚙️ Configuração de limites de estoque (mínimo/máximo)
+- 🔔 Alertas automáticos de estoque baixo/alto
+- ✅ Validação de estoque (impede saídas sem estoque)
+- 🗄️ Banco de dados SQLite normalizado e otimizado
+- 🐳 Totalmente containerizado com Docker
+- 🚀 API REST completa
+- 💾 Persistência de estado (lembra última aba visitada)
 
 ## 🚀 Como Usar
 
@@ -29,7 +35,20 @@ docker-compose up -d --build
 
 Acesse: http://localhost
 
-📖 Guia completo: [DOCKER-GUIA.md](DOCKER-GUIA.md)
+📖 Guia completo: [DOCKER.md](DOCKER.md)
+
+**Scripts de gerenciamento:**
+```bash
+# Linux/Mac
+./docker-manage.sh start    # Iniciar
+./docker-manage.sh logs     # Ver logs
+./docker-manage.sh backup   # Backup do banco
+
+# Windows
+.\docker-manage.ps1 start   # Iniciar
+.\docker-manage.ps1 logs    # Ver logs
+.\docker-manage.ps1 backup  # Backup do banco
+```
 
 ### 💻 Opção 2: Instalação Local
 
@@ -101,21 +120,54 @@ Registrar entrada ou saída de material
 }
 ```
 
+**Validações:**
+- ✅ Cria material automaticamente se não existir
+- ✅ Valida estoque disponível para saídas
+- ✅ Retorna erro detalhado se estoque insuficiente
+
 ### GET /api/records
-Listar todos os registros
+Listar todos os registros com informações completas
 
 ### GET /api/summary
-Resumo de estoque por material
+Resumo de estoque por material com status (baixo/normal/alto)
+
+### GET /api/materiais
+Lista de materiais com estoque atual e limites
+
+### GET /api/materials
+Lista completa de materiais cadastrados
+
+### PUT /api/materials/:id
+Atualizar limites de estoque (mínimo/máximo)
+
+```json
+{
+  "min_stock": 20,
+  "max_stock": 100
+}
+```
 
 ### GET /api/dashboard-data
-Dados para dashboard (gráficos + últimos registros)
+Dados para dashboard (gráficos + últimos registros + estatísticas)
 
-## 🛠️ Tecnologias
+## 🛠️ Stack Tecnológico
 
-- **Backend**: Node.js + Express + TypeScript
-- **Frontend**: TypeScript + Vite + Chart.js
-- **Banco de Dados**: SQLite
-- **UI**: Bootstrap 5
+### Backend
+- Node.js 20
+- TypeScript
+- Express.js
+- SQLite3
+
+### Frontend
+- TypeScript
+- Vite
+- Chart.js
+- Bootstrap 5
+
+### DevOps
+- Docker & Docker Compose
+- Nginx
+- Multi-stage builds
 
 ## 📦 Materiais Suportados
 
