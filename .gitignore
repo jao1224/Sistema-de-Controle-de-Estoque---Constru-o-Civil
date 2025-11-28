@@ -1,0 +1,55 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Database
+*.sqlite3
+*.db
+
+# Python (não usado - apenas para ignorar se criar scripts de teste)
+.venv/
+__pycache__/
+*.py
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+logs/
+*.log
+
+# Docker
+.dockerignore
+
+# Outros
+*.bak
+*.tmp
+.cache/

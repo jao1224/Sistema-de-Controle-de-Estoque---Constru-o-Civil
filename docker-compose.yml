@@ -1,0 +1,46 @@
+services:
+  # Backend API - Node.js + Express + SQLite
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: estoque-backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - db-data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5000/api/summary || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - estoque-network
+
+  # Frontend - Nginx + Static Files
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: estoque-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - estoque-network
+
+networks:
+  estoque-network:
+    driver: bridge
+
+volumes:
+  db-data:
+    driver: local
