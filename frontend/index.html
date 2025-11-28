@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Controle de Estoque - Construção Civil</title>
+  <title>BuildStock - Sistema de Controle de Estoque</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     :root {
@@ -26,15 +26,23 @@
     }
 
     body {
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      background: #f8fafc;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .d-flex {
+      display: flex;
     }
 
     .navbar {
       background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      padding: 1rem 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 0.75rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
     }
 
     .navbar-brand {
@@ -43,9 +51,143 @@
       letter-spacing: -0.5px;
     }
 
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: white;
+      min-height: calc(100vh - 60px);
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+    }
+
+    .sidebar-header {
+      padding: 1.5rem 1.25rem 1rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .sidebar-header h6 {
+      margin: 0;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #64748b;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 1rem 0;
+      overflow-y: auto;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      padding: 0.875rem 1.25rem;
+      color: #475569;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar-link:hover {
+      background-color: #f8fafc;
+      color: var(--primary-color);
+      border-left-color: var(--primary-color);
+    }
+
+    .sidebar-link.active {
+      background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, transparent 100%);
+      color: var(--primary-color);
+      border-left-color: var(--primary-color);
+      font-weight: 600;
+    }
+
+    .sidebar-icon {
+      font-size: 1.25rem;
+      margin-right: 0.875rem;
+      width: 24px;
+      text-align: center;
+    }
+
+    .sidebar-footer {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid #e2e8f0;
+      margin-top: auto;
+    }
+
+    .sidebar-user {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .sidebar-user-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .sidebar-user-info {
+      flex: 1;
+    }
+
+    .sidebar-user-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .sidebar-user-role {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+      min-height: calc(100vh - 60px);
+    }
+
     .container-main {
-      padding: 2.5rem 0;
+      padding: 2rem 2.5rem;
       animation: fadeIn 0.5s ease-in;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .container-fluid {
+      max-width: 100%;
+      padding: 0;
+    }
+
+    /* Seções */
+    .section {
+      margin-bottom: 2.5rem;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     @keyframes fadeIn {
@@ -56,11 +198,12 @@
     .card {
       border: none;
       box-shadow: var(--card-shadow);
-      margin-bottom: 1.5rem;
+      margin-bottom: 0;
       border-radius: 12px;
       transition: all 0.3s ease;
       background: white;
       overflow: hidden;
+      height: 100%;
     }
 
     .card:hover {
@@ -72,24 +215,43 @@
       font-weight: 600;
       color: #1e293b;
       margin-bottom: 1.5rem;
-      font-size: 1.1rem;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-body {
+      padding: 1.5rem;
     }
 
     .stat-card {
       text-align: center;
-      padding: 1.75rem 1rem;
+      padding: 2rem 1rem;
       position: relative;
       overflow: hidden;
+      border-left: 4px solid transparent;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 120px;
     }
 
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    .col-md-3 .stat-card:nth-child(1) {
+      border-left-color: var(--primary-color);
+    }
+
+    .col-md-3:nth-child(2) .stat-card {
+      border-left-color: var(--info-color);
+    }
+
+    .col-md-3:nth-child(3) .stat-card {
+      border-left-color: var(--success-color);
+    }
+
+    .col-md-3:nth-child(4) .stat-card {
+      border-left-color: var(--danger-color);
     }
 
     .stat-number {
@@ -126,7 +288,7 @@
 
     .form-section {
       background: white;
-      padding: 2rem;
+      padding: 2rem 2.5rem;
       border-radius: 12px;
       box-shadow: var(--card-shadow);
     }
@@ -134,9 +296,13 @@
     .form-section h5 {
       color: #1e293b;
       font-weight: 600;
-      margin-bottom: 1.5rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 2px solid #e2e8f0;
+      margin-bottom: 2rem;
+      padding-bottom: 0;
+      border-bottom: none;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .form-label {
@@ -251,6 +417,55 @@
       max-height: 350px;
     }
 
+    /* Grid spacing */
+    .g-3 {
+      gap: 1rem;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      margin: 0 -0.5rem;
+    }
+
+    .row > * {
+      padding: 0 0.5rem;
+    }
+
+    .col-md-3 {
+      flex: 0 0 25%;
+      max-width: 25%;
+    }
+
+    .col-md-4 {
+      flex: 0 0 33.333333%;
+      max-width: 33.333333%;
+    }
+
+    .col-md-8 {
+      flex: 0 0 66.666667%;
+      max-width: 66.666667%;
+    }
+
+    .col-md-2 {
+      flex: 0 0 16.666667%;
+      max-width: 16.666667%;
+    }
+
+    .col-md-9 {
+      flex: 0 0 75%;
+      max-width: 75%;
+    }
+
+    .col-12 {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+
+    .mb-3 {
+      margin-bottom: 1rem;
+    }
+
     /* Animações */
     @keyframes slideIn {
       from {
@@ -273,6 +488,19 @@
     .stat-card:nth-child(4) { animation-delay: 0.4s; }
 
     /* Responsivo */
+    @media (max-width: 992px) {
+      .sidebar {
+        position: fixed;
+        left: -260px;
+        transition: left 0.3s ease;
+        z-index: 999;
+      }
+
+      .sidebar.show {
+        left: 0;
+      }
+    }
+
     @media (max-width: 768px) {
       .stat-number {
         font-size: 2rem;
@@ -285,6 +513,101 @@
       .navbar-brand {
         font-size: 1.1rem;
       }
+
+      .container-main {
+        padding: 1.5rem 1rem;
+      }
+    }
+
+    /* Recent Records - Layout tipo Timeline */
+    .recent-records {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .recent-record-item {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border-radius: 8px;
+      border-left: 3px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .recent-record-item:hover {
+      background: #f1f5f9;
+      transform: translateX(4px);
+    }
+
+    .recent-record-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .recent-record-icon.entrada {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success-color);
+      border: 2px solid var(--success-color);
+    }
+
+    .recent-record-icon.saida {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger-color);
+      border: 2px solid var(--danger-color);
+    }
+
+    .recent-record-content {
+      flex: 1;
+    }
+
+    .recent-record-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .recent-record-header strong {
+      font-size: 1rem;
+      color: #1e293b;
+    }
+
+    .recent-record-time {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .recent-record-details {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .recent-record-qty {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .recent-record-location {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .recent-record-message {
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+      color: #64748b;
+      font-style: italic;
     }
 
     /* Loading spinner */
@@ -305,63 +628,154 @@
 </head>
 <body>
   <nav class="navbar navbar-dark">
-    <div class="container">
-      <span class="navbar-brand mb-0 h1">🏗️ Controle de Estoque - Construção Civil</span>
+    <div class="container-fluid">
+      <span class="navbar-brand mb-0 h1">🏗️ BuildStock</span>
+      <div class="d-flex align-items-center">
+        <span class="text-white small">Sistema de Gestão de Estoque</span>
+      </div>
     </div>
   </nav>
 
-  <div class="container-main">
-    <div class="container">
+  <div class="d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h6>Menu</h6>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#dashboard" class="sidebar-link active">
+          <span class="sidebar-icon">📊</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="#novo" class="sidebar-link">
+          <span class="sidebar-icon">➕</span>
+          <span>Novo Registro</span>
+        </a>
+        <a href="#estoque" class="sidebar-link">
+          <span class="sidebar-icon">📦</span>
+          <span>Estoque</span>
+        </a>
+        <a href="#historico" class="sidebar-link">
+          <span class="sidebar-icon">📋</span>
+          <span>Histórico</span>
+        </a>
+        <a href="#relatorios" class="sidebar-link">
+          <span class="sidebar-icon">📈</span>
+          <span>Relatórios</span>
+        </a>
+        <a href="#configuracoes" class="sidebar-link">
+          <span class="sidebar-icon">⚙️</span>
+          <span>Configurações</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-user-icon">👤</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name">João</div>
+            <div class="sidebar-user-role">Administrador</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="container-main">
+        <div class="container-fluid">
       
       <!-- Estatísticas -->
-      <div class="row mb-4">
-        <div class="col-md-3">
-          <div class="card stat-card">
-            <div class="stat-number" id="totalMateriais">0</div>
-            <div class="stat-label">Materiais</div>
+      <div id="dashboard" class="section">
+        <!-- Estatísticas -->
+        <div class="row mb-4">
+          <div class="col-md-3">
+            <div class="card stat-card">
+              <div class="stat-number" id="totalMateriais">0</div>
+              <div class="stat-label">Materiais</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card stat-card">
+              <div class="stat-number" id="totalRegistros">0</div>
+              <div class="stat-label">Registros</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card stat-card">
+              <div class="stat-number text-success" id="totalEntradas">0</div>
+              <div class="stat-label">Entradas</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card stat-card">
+              <div class="stat-number text-danger" id="totalSaidas">0</div>
+              <div class="stat-label">Saídas</div>
+            </div>
           </div>
         </div>
-        <div class="col-md-3">
-          <div class="card stat-card">
-            <div class="stat-number" id="totalRegistros">0</div>
-            <div class="stat-label">Registros</div>
+
+        <!-- Gráficos Principais -->
+        <div class="row mb-4">
+          <div class="col-md-8">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">📊 Estoque por Material</h5>
+                <canvas id="dashboardChartCanvas"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">📦 Resumo do Estoque</h5>
+                <div id="dashboardSummaryContainer">Carregando...</div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="col-md-3">
-          <div class="card stat-card">
-            <div class="stat-number text-success" id="totalEntradas">0</div>
-            <div class="stat-label">Entradas</div>
+
+        <!-- Gráficos Adicionais -->
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">📈 Entradas vs Saídas</h5>
+                <canvas id="entradaSaidaChart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">🥧 Distribuição de Materiais</h5>
+                <canvas id="distribuicaoChart"></canvas>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="col-md-3">
-          <div class="card stat-card">
-            <div class="stat-number text-danger" id="totalSaidas">0</div>
-            <div class="stat-label">Saídas</div>
+
+        <!-- Últimas Movimentações -->
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">📋 Últimas Movimentações</h5>
+                <div id="dashboardTableContainer">Carregando...</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Formulário de Registro -->
-      <div class="row mb-4">
-        <div class="col-12">
+      <div id="novo" class="section">
           <div class="form-section">
             <h5 class="mb-3">📝 Novo Registro</h5>
             <form id="stockForm">
               <div class="row">
                 <div class="col-md-3 mb-3">
                   <label class="form-label">Material *</label>
-                  <select class="form-select" id="material" required>
-                    <option value="">Selecione...</option>
-                    <option value="Cimento">Cimento</option>
-                    <option value="Areia">Areia</option>
-                    <option value="Brita">Brita</option>
-                    <option value="Tijolo">Tijolo</option>
-                    <option value="Telha">Telha</option>
-                    <option value="Ferro">Ferro</option>
-                    <option value="Madeira">Madeira</option>
-                    <option value="Tinta">Tinta</option>
-                    <option value="Outro">Outro</option>
-                  </select>
+                  <input type="text" class="form-control" id="material" placeholder="Ex: Cimento, Areia, Tijolo..." required>
                 </div>
                 <div class="col-md-2 mb-3">
                   <label class="form-label">Tipo *</label>
@@ -401,12 +815,25 @@
                 </div>
               </div>
             </form>
+        </div>
+
+        <!-- Lista de Materiais em Estoque -->
+        <div class="row mt-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">📦 Materiais em Estoque</h5>
+                <div id="materiaisListContainer">Carregando...</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Gráfico e Resumo -->
-      <div class="row mb-4">
+      <div id="estoque" class="section">
+        <h2 class="section-title">📊 Visão Geral do Estoque</h2>
+        <div class="row">
         <div class="col-md-8">
           <div class="card">
             <div class="card-body">
@@ -422,14 +849,66 @@
               <div id="summaryContainer">Carregando...</div>
             </div>
           </div>
+          </div>
         </div>
       </div>
 
       <!-- Tabela de Registros -->
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">📋 Últimos Registros</h5>
-          <div id="tableContainer">Carregando...</div>
+      <div id="historico" class="section">
+        <h2 class="section-title">📋 Histórico de Movimentações</h2>
+        <div class="card">
+          <div class="card-body">
+            <div id="tableContainer">Carregando...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Relatórios -->
+      <div id="relatorios" class="section">
+        <h2 class="section-title">📈 Relatórios</h2>
+        <div class="card">
+          <div class="card-body">
+            <p class="text-muted mb-4">Funcionalidade de relatórios em desenvolvimento...</p>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                  <button class="btn btn-outline-primary w-100" disabled>
+                    📊 Relatório de Movimentações
+                  </button>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <button class="btn btn-outline-primary w-100" disabled>
+                    📦 Relatório de Estoque Atual
+                  </button>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <button class="btn btn-outline-primary w-100" disabled>
+                    📉 Relatório de Consumo
+                  </button>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Configurações -->
+      <div id="configuracoes" class="section">
+        <h2 class="section-title">⚙️ Configurações de Estoque</h2>
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <p class="text-muted mb-2">Configure os limites mínimos e máximos de estoque para cada material.</p>
+                <p class="text-muted mb-0"><small>💡 O sistema alertará quando o estoque estiver abaixo do mínimo (🔴) ou acima do máximo (🟡).</small></p>
+              </div>
+              <button class="btn btn-success" onclick="salvarTodasConfigs()" style="white-space: nowrap;">
+                💾 Salvar Todas
+              </button>
+            </div>
+            <div id="configMateriaisContainer">Carregando...</div>
+          </div>
+        </div>
+      </div>
+
         </div>
       </div>
     </div>
