@@ -1,8 +1,8 @@
 # Backend Dockerfile - Node.js + TypeScript + Express + SQLite (Estrutura Melhorada)
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 
 # Instalar dependências de build
-RUN apk add --no-cache python3 make g++
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -10,8 +10,14 @@ WORKDIR /app
 COPY package*.json ./
 COPY tsconfig.json ./
 
+# Configurar npm para usar o registro oficial e aumentar timeout
+RUN npm config set fetch-timeout 60000 && \
+    npm config set fetch-retries 5 && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000
+
 # Instalar todas as dependências (incluindo dev para build)
-RUN npm ci
+RUN npm install
 
 # Copiar código fonte
 COPY src ./src
@@ -20,18 +26,18 @@ COPY src ./src
 RUN npm run build
 
 # Stage 2: Production
-FROM node:20-alpine
+FROM node:20-slim
 
-# Instalar apenas dependências de runtime
-RUN apk add --no-cache sqlite wget
+# Instalar dependências de runtime
+RUN apt-get update && apt-get install -y sqlite3 wget && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 # Copiar package.json
 COPY package*.json ./
 
-# Instalar apenas dependências de produção
-RUN npm ci --only=production && npm cache clean --force
+# Copiar node_modules do builder (já compilado para Linux)
+COPY --from=builder /app/node_modules ./node_modules
 
 # Copiar código compilado do builder
 COPY --from=builder /app/dist ./dist
