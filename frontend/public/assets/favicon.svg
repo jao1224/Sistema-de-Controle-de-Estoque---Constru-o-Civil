@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Fundo branco com bordas arredondadas -->
+  <rect width="64" height="64" fill="#ffffff" rx="8"/>
+  
+  <!-- B vermelho estilizado (similar ao da Bergano) -->
+  <path d="M 20 15 L 35 15 C 42 15 45 18 45 23 C 45 26 43 28 40 29 C 44 30 47 33 47 37 C 47 43 43 49 35 49 L 20 49 Z M 28 26 L 33 26 C 36 26 38 25 38 23 C 38 21 36 20 33 20 L 28 20 Z M 28 44 L 34 44 C 37 44 40 42 40 38 C 40 34 37 32 34 32 L 28 32 Z" fill="#c62828" stroke="none"/>
+</svg>
