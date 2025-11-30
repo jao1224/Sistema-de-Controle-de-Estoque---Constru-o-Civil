@@ -33,6 +33,7 @@ interface MaterialSummary {
   max_stock: number | null;
   last_update: string;
   status: 'baixo' | 'normal' | 'alto';
+  description?: string;
 }
 
 let chartInstance: Chart | null = null;
@@ -201,7 +202,7 @@ function renderTable(records: StockRecord[], containerId: string = 'tableContain
 
   // Layout padrão de tabela para outras abas
   const table = document.createElement('table');
-  table.className = 'table table-sm table-hover';
+  table.className = 'table table-hover';
   table.innerHTML = `
     <thead class="table-light">
       <tr>
@@ -531,6 +532,7 @@ function renderMateriaisList(materiais: MaterialSummary[]): void {
         <th>Estoque Mínimo</th>
         <th>Última Atualização</th>
         <th>Status</th>
+        <th style="width: 120px;">Ações</th>
       </tr>
     </thead>
     <tbody>
@@ -564,6 +566,16 @@ function renderMateriaisList(materiais: MaterialSummary[]): void {
               <td><small class="text-muted">${m.min_stock || 0}</small></td>
               <td><small class="text-muted">${lastUpdate}</small></td>
               <td><span class="badge ${statusClass}">${statusText}</span></td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn-action btn-edit" onclick="editarMaterial(${m.id})" title="Editar material">
+                    ✏️
+                  </button>
+                  <button class="btn-action btn-delete" onclick="excluirMaterial(${m.id}, '${escapeHtml(m.material).replace(/'/g, "\\'")}')" title="Excluir material">
+                    🗑️
+                  </button>
+                </div>
+              </td>
             </tr>
           `;
         })
@@ -814,9 +826,11 @@ function renderConfigMateriais(materiais: any[]): void {
               </td>
               <td>${statusBadge}</td>
               <td>
-                <button class="btn btn-sm btn-primary" onclick="salvarConfigMaterial(${m.id})" title="Salvar apenas este material">
-                  💾
-                </button>
+                <div class="action-buttons">
+                  <button class="btn-action btn-save" onclick="salvarConfigMaterial(${m.id})" title="Salvar configuração">
+                    💾
+                  </button>
+                </div>
               </td>
             </tr>
           `;
@@ -1017,10 +1031,119 @@ function setupFilters(): void {
   }
 }
 
+async function editarMaterial(materialId: number): Promise<void> {
+  // Buscar dados do material
+  const materiais = await fetchMateriais();
+  const material = materiais.find(m => m.id === materialId);
+  
+  if (!material) {
+    alert('❌ Material não encontrado!');
+    return;
+  }
+
+  // Preencher modal com dados atuais
+  (document.getElementById('editMaterialId') as HTMLInputElement).value = materialId.toString();
+  (document.getElementById('editMaterialNome') as HTMLInputElement).value = material.material;
+  (document.getElementById('editMaterialUnidade') as HTMLSelectElement).value = material.unit;
+  (document.getElementById('editMaterialMin') as HTMLInputElement).value = material.min_stock.toString();
+  (document.getElementById('editMaterialMax') as HTMLInputElement).value = material.max_stock?.toString() || '';
+  (document.getElementById('editMaterialDescricao') as HTMLTextAreaElement).value = material.description || '';
+
+  // Abrir modal
+  const modal = new (window as any).bootstrap.Modal(document.getElementById('modalEditarMaterial'));
+  modal.show();
+}
+
+async function salvarEdicaoMaterial(): Promise<void> {
+  const materialId = parseInt((document.getElementById('editMaterialId') as HTMLInputElement).value);
+  const nome = (document.getElementById('editMaterialNome') as HTMLInputElement).value;
+  const unidade = (document.getElementById('editMaterialUnidade') as HTMLSelectElement).value;
+  const min = (document.getElementById('editMaterialMin') as HTMLInputElement).value;
+  const max = (document.getElementById('editMaterialMax') as HTMLInputElement).value;
+  const descricao = (document.getElementById('editMaterialDescricao') as HTMLTextAreaElement).value;
+
+  if (!nome || !unidade) {
+    alert('❌ Nome e unidade são obrigatórios!');
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/materials/${materialId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: nome,
+        unit: unidade,
+        min_stock: parseFloat(min) || 0,
+        max_stock: max ? parseFloat(max) : null,
+        description: descricao || ''
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.ok) {
+      // Fechar modal
+      const modal = (window as any).bootstrap.Modal.getInstance(document.getElementById('modalEditarMaterial'));
+      modal.hide();
+      
+      alert('✅ Material atualizado com sucesso!');
+      await loadData();
+    } else {
+      alert(`❌ Erro: ${data.error || 'Não foi possível atualizar'}`);
+    }
+  } catch (error) {
+    console.error('Erro:', error);
+    alert('❌ Erro ao conectar com o servidor.');
+  }
+}
+
+async function excluirMaterial(materialId: number, materialNome: string): Promise<void> {
+  // Preencher modal
+  (document.getElementById('deleteMaterialId') as HTMLInputElement).value = materialId.toString();
+  (document.getElementById('deleteMaterialNome') as HTMLElement).textContent = materialNome;
+
+  // Abrir modal
+  const modal = new (window as any).bootstrap.Modal(document.getElementById('modalExcluirMaterial'));
+  modal.show();
+}
+
+async function confirmarExclusaoMaterial(): Promise<void> {
+  const materialId = parseInt((document.getElementById('deleteMaterialId') as HTMLInputElement).value);
+
+  try {
+    const response = await fetch(`/api/materials/${materialId}`, {
+      method: 'DELETE',
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.ok) {
+      // Fechar modal
+      const modal = (window as any).bootstrap.Modal.getInstance(document.getElementById('modalExcluirMaterial'));
+      modal.hide();
+      
+      alert('✅ Material excluído com sucesso!');
+      await loadData();
+    } else {
+      alert(`❌ Erro: ${data.error || 'Não foi possível excluir'}`);
+    }
+  } catch (error) {
+    console.error('Erro:', error);
+    alert('❌ Erro ao conectar com o servidor.');
+  }
+}
+
 // Expor funções globalmente para o onclick
 (window as any).salvarConfigMaterial = salvarConfigMaterial;
 (window as any).salvarTodasConfigs = salvarTodasConfigs;
 (window as any).clearFilters = clearFilters;
+(window as any).editarMaterial = editarMaterial;
+(window as any).excluirMaterial = excluirMaterial;
+(window as any).salvarEdicaoMaterial = salvarEdicaoMaterial;
+(window as any).confirmarExclusaoMaterial = confirmarExclusaoMaterial;
 
 async function init(): Promise<void> {
   const form = document.getElementById('stockForm');

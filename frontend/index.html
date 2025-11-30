@@ -33,6 +33,7 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       min-height: 100vh;
       overflow-x: hidden;
+      font-size: 16px;
     }
 
     .d-flex {
@@ -49,7 +50,7 @@
     }
 
     .navbar-brand {
-      font-size: 1.5rem;
+      font-size: 1.75rem;
       font-weight: 600;
       letter-spacing: -0.5px;
     }
@@ -94,7 +95,7 @@
       color: #475569;
       text-decoration: none;
       transition: all 0.2s ease;
-      font-size: 0.9375rem;
+      font-size: 1rem;
       font-weight: 500;
       border-left: 3px solid transparent;
     }
@@ -147,13 +148,13 @@
     }
 
     .sidebar-user-name {
-      font-size: 0.875rem;
+      font-size: 0.9375rem;
       font-weight: 600;
       color: #1e293b;
     }
 
     .sidebar-user-role {
-      font-size: 0.75rem;
+      font-size: 0.8125rem;
       color: #64748b;
     }
 
@@ -182,7 +183,7 @@
     }
 
     .section-title {
-      font-size: 1.25rem;
+      font-size: 1.5rem;
       font-weight: 600;
       color: #1e293b;
       margin-bottom: 1.5rem;
@@ -218,7 +219,7 @@
       font-weight: 600;
       color: #1e293b;
       margin-bottom: 1.5rem;
-      font-size: 1rem;
+      font-size: 1.125rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -262,7 +263,7 @@
     }
 
     .stat-number {
-      font-size: 2.5rem;
+      font-size: 3rem;
       font-weight: 700;
       color: inherit;
       line-height: 1;
@@ -271,7 +272,7 @@
 
     .stat-label {
       color: #64748b;
-      font-size: 0.875rem;
+      font-size: 0.9375rem;
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -303,15 +304,15 @@
       font-weight: 500;
       color: #475569;
       margin-bottom: 0.5rem;
-      font-size: 0.875rem;
+      font-size: 0.9375rem;
     }
 
     .form-control, .form-select {
       border: 2px solid #e2e8f0;
       border-radius: 8px;
-      padding: 0.625rem 0.875rem;
+      padding: 0.75rem 1rem;
       transition: all 0.2s ease;
-      font-size: 0.9375rem;
+      font-size: 1rem;
     }
 
     .form-control:focus, .form-select:focus {
@@ -319,44 +320,132 @@
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-      border: none;
+    /* Sistema de Botões Modernos */
+    .btn {
       border-radius: 8px;
-      padding: 0.75rem 1.5rem;
       font-weight: 600;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 6px -1px rgba(102, 126, 234, 0.3);
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0.75rem 1.5rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
     }
 
     .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 15px -3px rgba(102, 126, 234, 0.4);
-      background: linear-gradient(135deg, var(--primary-dark), var(--secondary-color));
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
     }
 
-    .btn-primary:active {
-      transform: translateY(0);
+    .btn-success {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #64748b, #475569);
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: linear-gradient(135deg, #475569, #334155);
+    }
+
+    .btn-outline-primary {
+      background: transparent;
+      border: 2px solid var(--primary-color);
+      color: var(--primary-color);
+      box-shadow: none;
+    }
+
+    .btn-outline-primary:hover {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-outline-secondary {
+      background: transparent;
+      border: 2px solid #64748b;
+      color: #64748b;
+      box-shadow: none;
+    }
+
+    .btn-outline-secondary:hover {
+      background: #64748b;
+      color: white;
+    }
+
+    /* Tamanhos de botões */
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.9375rem;
+    }
+
+    .btn-lg {
+      padding: 1rem 2rem;
+      font-size: 1.125rem;
+    }
+
+    /* Botão com largura total */
+    .w-100 {
+      width: 100%;
     }
 
     .badge-entrada {
       background-color: var(--success-color);
-      padding: 0.375rem 0.75rem;
+      padding: 0.5rem 0.875rem;
       border-radius: 6px;
       font-weight: 600;
-      font-size: 0.75rem;
+      font-size: 0.8125rem;
     }
 
     .badge-saida {
       background-color: var(--danger-color);
-      padding: 0.375rem 0.75rem;
+      padding: 0.5rem 0.875rem;
       border-radius: 6px;
       font-weight: 600;
-      font-size: 0.75rem;
+      font-size: 0.8125rem;
     }
 
     .table {
-      font-size: 0.9rem;
+      font-size: 1.0625rem;
     }
 
     .table thead {
@@ -368,9 +457,9 @@
       font-weight: 600;
       color: #475569;
       text-transform: uppercase;
-      font-size: 0.75rem;
+      font-size: 0.875rem;
       letter-spacing: 0.5px;
-      padding: 1rem 0.75rem;
+      padding: 1.125rem 1rem;
     }
 
     .table tbody tr {
@@ -382,8 +471,17 @@
     }
 
     .table tbody td {
-      padding: 0.875rem 0.75rem;
+      padding: 1rem 1rem;
       vertical-align: middle;
+      font-size: 1.0625rem;
+    }
+
+    .table tbody td strong {
+      font-size: 1.125rem;
+    }
+
+    .table tbody td small {
+      font-size: 0.9375rem;
     }
 
     .list-group-item {
@@ -391,6 +489,7 @@
       padding: 0.875rem 0;
       border-bottom: 1px solid #f1f5f9;
       transition: background-color 0.2s ease;
+      font-size: 1rem;
     }
 
     .list-group-item:hover {
@@ -401,10 +500,24 @@
       border-bottom: none;
     }
 
+    .list-group-item .small {
+      font-size: 1rem !important;
+    }
+
     .badge.rounded-pill {
       padding: 0.5rem 0.875rem;
       font-weight: 600;
-      font-size: 0.875rem;
+      font-size: 1rem;
+    }
+
+    .badge.bg-success,
+    .badge.bg-danger,
+    .badge.bg-warning,
+    .badge.bg-secondary,
+    .badge.bg-info {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      font-weight: 600;
     }
 
     #chartCanvas {
@@ -570,12 +683,12 @@
     }
 
     .recent-record-header strong {
-      font-size: 1rem;
+      font-size: 1.0625rem;
       color: #1e293b;
     }
 
     .recent-record-time {
-      font-size: 0.75rem;
+      font-size: 0.8125rem;
       color: #64748b;
     }
 
@@ -587,19 +700,19 @@
     }
 
     .recent-record-qty {
-      font-size: 0.875rem;
+      font-size: 0.9375rem;
       font-weight: 600;
       color: #475569;
     }
 
     .recent-record-location {
-      font-size: 0.75rem;
+      font-size: 0.8125rem;
       color: #64748b;
     }
 
     .recent-record-message {
       margin-top: 0.5rem;
-      font-size: 0.875rem;
+      font-size: 0.9375rem;
       color: #64748b;
       font-style: italic;
     }
@@ -618,6 +731,187 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+
+    /* Botões de Ação */
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1.125rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-action:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-edit {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+    }
+
+    .btn-edit:hover {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    }
+
+    .btn-delete {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+    }
+
+    .btn-delete:hover {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+    }
+
+    .btn-save {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+    }
+
+    .btn-save:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+    }
+
+    /* Tooltip para botões */
+    .btn-action[title] {
+      position: relative;
+    }
+
+    .btn-action[title]:hover::after {
+      content: attr(title);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 0.375rem 0.75rem;
+      background: #1e293b;
+      color: white;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+      z-index: 1000;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-action[title]:hover::before {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: #1e293b;
+      margin-bottom: -6px;
+      z-index: 1000;
+    }
+
+    /* Melhorias nos Modais */
+    .modal-content {
+      border-radius: 12px;
+      border: none;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .modal-header {
+      border-bottom: 2px solid #e2e8f0;
+      padding: 1.5rem;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border-radius: 12px 12px 0 0;
+    }
+
+    .modal-header.bg-danger {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      border-bottom-color: #dc2626;
+    }
+
+    .modal-title {
+      font-weight: 600;
+      font-size: 1.375rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .modal-footer {
+      border-top: 2px solid #e2e8f0;
+      padding: 1.25rem 1.5rem;
+      background: #f8fafc;
+      border-radius: 0 0 12px 12px;
+      gap: 0.75rem;
+    }
+
+    .btn-close {
+      opacity: 0.5;
+      transition: all 0.2s ease;
+    }
+
+    .btn-close:hover {
+      opacity: 1;
+      transform: rotate(90deg);
+    }
+
+    .btn-close-white {
+      filter: brightness(0) invert(1);
+    }
+
+    /* Alertas nos modais */
+    .alert {
+      border-radius: 8px;
+      border: none;
+      padding: 1rem;
+      font-size: 0.9375rem;
+    }
+
+    .alert-warning {
+      background: rgba(245, 158, 11, 0.1);
+      color: #92400e;
+      border-left: 4px solid #f59e0b;
+    }
+
+    .alert-info {
+      background: rgba(59, 130, 246, 0.1);
+      color: #1e40af;
+      border-left: 4px solid #3b82f6;
+    }
+
+    /* Melhorias específicas para tabelas */
+    .table .fs-5 {
+      font-size: 1.25rem !important;
+    }
+
+    .table .fw-bold {
+      font-weight: 700 !important;
+    }
+
+    /* Inputs nas tabelas de configuração */
+    .config-input {
+      font-size: 1rem !important;
+      padding: 0.625rem 0.875rem !important;
+    }
   </style>
 </head>
 <body>
@@ -627,7 +921,7 @@
         <img src="/assets/logo_bergano.png" alt="Bergano" style="height:36px;display:inline-block;" />
       </a>
       <div class="d-flex align-items-center">
-        <span class="text-white small">Sistema de Gestão de Estoque</span>
+        <span class="text-white" style="font-size: 1rem;">Sistema de Gestão de Estoque</span>
       </div>
     </div>
   </nav>
@@ -807,7 +1101,7 @@
                   <input type="text" class="form-control" id="message" placeholder="Informações adicionais">
                 </div>
                 <div class="col-md-3 mb-3 d-flex align-items-end">
-                  <button type="submit" class="btn btn-primary w-100">Registrar</button>
+                  <button type="submit" class="btn btn-primary btn-lg w-100">✅ Registrar</button>
                 </div>
               </div>
             </form>
@@ -879,7 +1173,7 @@
                 </select>
               </div>
               <div class="col-md-2 d-flex align-items-end">
-                <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                <button class="btn btn-outline-secondary w-100" onclick="clearFilters()" title="Limpar todos os filtros">
                   🔄 Limpar
                 </button>
               </div>
@@ -902,17 +1196,17 @@
             <p class="text-muted mb-4">Funcionalidade de relatórios em desenvolvimento...</p>
             <div class="row">
                 <div class="col-md-4 mb-3">
-                  <button class="btn btn-outline-primary w-100" disabled>
+                  <button class="btn btn-outline-primary btn-lg w-100" disabled>
                     📊 Relatório de Movimentações
                   </button>
                 </div>
                 <div class="col-md-4 mb-3">
-                  <button class="btn btn-outline-primary w-100" disabled>
+                  <button class="btn btn-outline-primary btn-lg w-100" disabled>
                     📦 Relatório de Estoque Atual
                   </button>
                 </div>
                 <div class="col-md-4 mb-3">
-                  <button class="btn btn-outline-primary w-100" disabled>
+                  <button class="btn btn-outline-primary btn-lg w-100" disabled>
                     📉 Relatório de Consumo
                   </button>
                 </div>
@@ -931,7 +1225,7 @@
                 <p class="text-muted mb-2">Configure os limites mínimos e máximos de estoque para cada material.</p>
                 <p class="text-muted mb-0"><small>💡 O sistema alertará quando o estoque estiver abaixo do mínimo (🔴) ou acima do máximo (🟡).</small></p>
               </div>
-              <button class="btn btn-success" onclick="salvarTodasConfigs()" style="white-space: nowrap;">
+              <button class="btn btn-success btn-lg" onclick="salvarTodasConfigs()" style="white-space: nowrap;">
                 💾 Salvar Todas
               </button>
             </div>
@@ -945,6 +1239,82 @@
     </div>
   </div>
 
+  <!-- Modal Editar Material -->
+  <div class="modal fade" id="modalEditarMaterial" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">✏️ Editar Material</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formEditarMaterial">
+            <input type="hidden" id="editMaterialId">
+            <div class="mb-3">
+              <label class="form-label">Nome do Material *</label>
+              <input type="text" class="form-control" id="editMaterialNome" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Unidade *</label>
+              <select class="form-select" id="editMaterialUnidade" required>
+                <option value="un">Unidade</option>
+                <option value="kg">Kg</option>
+                <option value="m³">m³</option>
+                <option value="m²">m²</option>
+                <option value="m">Metro</option>
+                <option value="saco">Saco</option>
+                <option value="lata">Lata</option>
+              </select>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Estoque Mínimo *</label>
+                <input type="number" class="form-control" id="editMaterialMin" step="0.01" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Estoque Máximo</label>
+                <input type="number" class="form-control" id="editMaterialMax" step="0.01" placeholder="Opcional">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Descrição</label>
+              <textarea class="form-control" id="editMaterialDescricao" rows="2" placeholder="Opcional"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">✖️ Cancelar</button>
+          <button type="button" class="btn btn-success" onclick="salvarEdicaoMaterial()">💾 Salvar Alterações</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Excluir Material -->
+  <div class="modal fade" id="modalExcluirMaterial" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title">🗑️ Excluir Material</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="deleteMaterialId">
+          <p class="mb-3">⚠️ Tem certeza que deseja excluir o material:</p>
+          <p class="text-center"><strong id="deleteMaterialNome" class="fs-5"></strong></p>
+          <div class="alert alert-warning mt-3">
+            <small>💡 Se houver registros associados, o material será apenas desativado.</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">✖️ Cancelar</button>
+          <button type="button" class="btn btn-danger" onclick="confirmarExclusaoMaterial()">🗑️ Confirmar Exclusão</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="/src/main.ts"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

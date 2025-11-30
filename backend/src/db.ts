@@ -362,6 +362,36 @@ export class DatabasePostgres {
     return result.rows;
   }
 
+  async createMaterial(
+    name: string,
+    unit: string = 'un',
+    minStock: number = 0,
+    maxStock: number | null = null,
+    description: string = ''
+  ): Promise<{ success: boolean; id?: number; error?: string }> {
+    try {
+      // Verificar se já existe
+      const existing = await this.pool.query(
+        'SELECT id FROM materials WHERE LOWER(name) = LOWER($1)',
+        [name]
+      );
+
+      if (existing.rows.length > 0) {
+        return { success: false, error: 'Material já existe' };
+      }
+
+      // Criar material
+      const result = await this.pool.query(
+        'INSERT INTO materials (name, unit, min_stock, max_stock, description) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+        [name, unit, minStock, maxStock, description]
+      );
+
+      return { success: true, id: result.rows[0].id };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  }
+
   async updateMaterialLimits(
     materialId: number,
     minStock: number,
@@ -377,6 +407,75 @@ export class DatabasePostgres {
     }
 
     return { success: true };
+  }
+
+  async updateMaterial(
+    materialId: number,
+    name: string,
+    unit: string,
+    minStock: number,
+    maxStock: number | null,
+    description: string
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      // Verificar se outro material já usa esse nome
+      const existing = await this.pool.query(
+        'SELECT id FROM materials WHERE LOWER(name) = LOWER($1) AND id != $2',
+        [name, materialId]
+      );
+
+      if (existing.rows.length > 0) {
+        return { success: false, error: 'Já existe outro material com esse nome' };
+      }
+
+      const result = await this.pool.query(
+        'UPDATE materials SET name = $1, unit = $2, min_stock = $3, max_stock = $4, description = $5 WHERE id = $6',
+        [name, unit, minStock, maxStock, description, materialId]
+      );
+
+      if (result.rowCount === 0) {
+        return { success: false, error: 'Material não encontrado' };
+      }
+
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  }
+
+  async deleteMaterial(materialId: number): Promise<{ success: boolean; error?: string }> {
+    try {
+      // Verificar se tem registros associados
+      const records = await this.pool.query(
+        'SELECT COUNT(*) as count FROM stock_records WHERE material_id = $1',
+        [materialId]
+      );
+
+      const recordCount = parseInt(records.rows[0].count);
+
+      if (recordCount > 0) {
+        // Soft delete - apenas marca como inativo
+        await this.pool.query(
+          'UPDATE materials SET active = false WHERE id = $1',
+          [materialId]
+        );
+        return { success: true };
+      } else {
+        // Hard delete - remove completamente se não tem registros
+        const result = await this.pool.query(
+          'DELETE FROM materials WHERE id = $1',
+          [materialId]
+        );
+
+        if (result.rowCount === 0) {
+          return { success: false, error: 'Material não encontrado' };
+        }
+
+        return { success: true };
+      }
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
   }
 
   async close(): Promise<void> {

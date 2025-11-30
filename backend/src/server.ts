@@ -105,16 +105,81 @@ app.get('/api/materials', async (req: Request, res: Response) => {
   }
 });
 
+app.post('/api/materials', async (req: Request, res: Response) => {
+  try {
+    const { name, unit, min_stock, max_stock, description } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ error: 'Nome do material é obrigatório' });
+    }
+
+    const result = await db.createMaterial(
+      name,
+      unit || 'un',
+      min_stock ? parseFloat(min_stock) : 0,
+      max_stock ? parseFloat(max_stock) : null,
+      description || ''
+    );
+
+    if (result.success) {
+      res.status(201).json({ ok: true, id: result.id });
+    } else {
+      res.status(400).json({ error: result.error });
+    }
+  } catch (error) {
+    res.status(500).json({ error: String(error) });
+  }
+});
+
 app.put('/api/materials/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { min_stock, max_stock } = req.body;
+    const { name, unit, min_stock, max_stock, description } = req.body;
 
-    const result = await db.updateMaterialLimits(
+    // Se vier só min_stock e max_stock, usa o método antigo (compatibilidade)
+    if (!name && !unit && (min_stock !== undefined || max_stock !== undefined)) {
+      const result = await db.updateMaterialLimits(
+        parseInt(id),
+        parseFloat(min_stock),
+        max_stock ? parseFloat(max_stock) : null
+      );
+
+      if (result.success) {
+        return res.json({ ok: true });
+      } else {
+        return res.status(400).json({ error: result.error });
+      }
+    }
+
+    // Atualização completa do material
+    if (!name || !unit) {
+      return res.status(400).json({ error: 'Nome e unidade são obrigatórios' });
+    }
+
+    const result = await db.updateMaterial(
       parseInt(id),
-      parseFloat(min_stock),
-      max_stock ? parseFloat(max_stock) : null
+      name,
+      unit,
+      min_stock ? parseFloat(min_stock) : 0,
+      max_stock ? parseFloat(max_stock) : null,
+      description || ''
     );
+
+    if (result.success) {
+      res.json({ ok: true });
+    } else {
+      res.status(400).json({ error: result.error });
+    }
+  } catch (error) {
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+app.delete('/api/materials/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const result = await db.deleteMaterial(parseInt(id));
 
     if (result.success) {
       res.json({ ok: true });
