@@ -67,6 +67,10 @@ interface DashboardData {
     totalEntradas: number;
     totalSaidas: number;
     lowStock: number;
+    totalValue: number;
+    materiaisAlerta: number;
+    taxaGiro: number;
+    materiaisZerados: number;
   };
 }
 
@@ -800,15 +804,23 @@ async function loadData(): Promise<void> {
     
     // Atualizar estatísticas usando os dados do dashboard
     if (dashboardData.stats) {
-      const totalMateriaisEl = document.getElementById('totalMateriais');
-      const totalRegistrosEl = document.getElementById('totalRegistros');
-      const totalEntradasEl = document.getElementById('totalEntradas');
-      const totalSaidasEl = document.getElementById('totalSaidas');
+      const valorTotalEl = document.getElementById('valorTotal');
+      const materiaisAlertaEl = document.getElementById('materiaisAlerta');
+      const taxaGiroEl = document.getElementById('taxaGiro');
+      const materiaisZeradosEl = document.getElementById('materiaisZerados');
 
-      if (totalMateriaisEl) totalMateriaisEl.textContent = dashboardData.stats.totalMaterials.toString();
-      if (totalRegistrosEl) totalRegistrosEl.textContent = dashboardData.stats.totalRecords.toString();
-      if (totalEntradasEl) totalEntradasEl.textContent = dashboardData.stats.totalEntradas.toString();
-      if (totalSaidasEl) totalSaidasEl.textContent = dashboardData.stats.totalSaidas.toString();
+      if (valorTotalEl) {
+        const valorFormatado = dashboardData.stats.totalValue.toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0
+        });
+        valorTotalEl.textContent = valorFormatado;
+      }
+      if (materiaisAlertaEl) materiaisAlertaEl.textContent = dashboardData.stats.materiaisAlerta.toString();
+      if (taxaGiroEl) taxaGiroEl.textContent = `${dashboardData.stats.taxaGiro}%`;
+      if (materiaisZeradosEl) materiaisZeradosEl.textContent = dashboardData.stats.materiaisZerados.toString();
     }
     
     // Renderizar no dashboard principal

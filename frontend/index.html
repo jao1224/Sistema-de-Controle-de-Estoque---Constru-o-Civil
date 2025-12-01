@@ -417,6 +417,14 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.375rem;
+    }
+    
+    .stat-label i {
+      font-size: var(--font-size-sm);
     }
 
     .text-success .stat-number { color: inherit; }
@@ -1441,26 +1449,26 @@
         <div class="row mb-4">
           <div class="col-md-3">
             <div class="card stat-card">
-              <div class="stat-number" id="totalMateriais">0</div>
-              <div class="stat-label">Materiais</div>
+              <div class="stat-number" id="valorTotal">R$ 0</div>
+              <div class="stat-label"><i class="bi bi-currency-dollar"></i> Valor Total</div>
             </div>
           </div>
           <div class="col-md-3">
             <div class="card stat-card">
-              <div class="stat-number" id="totalRegistros">0</div>
-              <div class="stat-label">Registros</div>
+              <div class="stat-number" id="materiaisAlerta">0</div>
+              <div class="stat-label"><i class="bi bi-exclamation-triangle"></i> Em Alerta</div>
             </div>
           </div>
           <div class="col-md-3">
             <div class="card stat-card">
-              <div class="stat-number text-success" id="totalEntradas">0</div>
-              <div class="stat-label">Entradas</div>
+              <div class="stat-number" id="taxaGiro">0%</div>
+              <div class="stat-label"><i class="bi bi-arrow-repeat"></i> Taxa de Giro</div>
             </div>
           </div>
           <div class="col-md-3">
             <div class="card stat-card">
-              <div class="stat-number text-danger" id="totalSaidas">0</div>
-              <div class="stat-label">Saídas</div>
+              <div class="stat-number" id="materiaisZerados">0</div>
+              <div class="stat-label"><i class="bi bi-x-octagon"></i> Zerados</div>
             </div>
           </div>
         </div>
