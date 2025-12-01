@@ -1452,7 +1452,41 @@
           <div class="col-12">
             <div class="card">
               <div class="card-body">
-                <h5 class="card-title"><i class="bi bi-box-seam"></i> Materiais em Estoque</h5>
+                <h5 class="card-title mb-4"><i class="bi bi-box-seam"></i> Materiais em Estoque</h5>
+                
+                <!-- Filtros -->
+                <div class="row g-3 mb-4">
+                  <div class="col-md-4">
+                    <label class="form-label"><i class="bi bi-search"></i> Buscar Material</label>
+                    <input type="text" class="form-control" id="filterMaterialEstoque" placeholder="Digite o nome do material...">
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label"><i class="bi bi-funnel"></i> Status</label>
+                    <select class="form-select" id="filterStatusEstoque">
+                      <option value="">Todos</option>
+                      <option value="normal">Normal</option>
+                      <option value="baixo">Estoque Baixo</option>
+                      <option value="alto">Estoque Alto</option>
+                      <option value="zerado">Zerado</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label"><i class="bi bi-sort-down"></i> Ordenar por</label>
+                    <select class="form-select" id="filterOrdenarEstoque">
+                      <option value="nome">Nome (A-Z)</option>
+                      <option value="nome-desc">Nome (Z-A)</option>
+                      <option value="quantidade">Quantidade (Maior)</option>
+                      <option value="quantidade-asc">Quantidade (Menor)</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-outline-secondary w-100" onclick="clearMateriaisFilters()" title="Limpar filtros">
+                      <i class="bi bi-arrow-clockwise"></i> Limpar
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Lista de Materiais -->
                 <div id="materiaisListContainer">Carregando...</div>
               </div>
             </div>

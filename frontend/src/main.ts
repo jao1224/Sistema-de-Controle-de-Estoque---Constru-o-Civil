@@ -644,6 +644,83 @@ function renderMateriaisList(materiais: MaterialSummary[]): void {
   container.appendChild(table);
 }
 
+// Variável global para armazenar todos os materiais
+let allMateriaisCache: MaterialSummary[] = [];
+
+function applyMateriaisFilters(): void {
+  const materialFilter = (document.getElementById('filterMaterialEstoque') as HTMLInputElement)?.value.toLowerCase() || '';
+  const statusFilter = (document.getElementById('filterStatusEstoque') as HTMLSelectElement)?.value || '';
+  const ordenarFilter = (document.getElementById('filterOrdenarEstoque') as HTMLSelectElement)?.value || 'nome';
+
+  let filtered = [...allMateriaisCache];
+
+  // Filtrar por nome do material
+  if (materialFilter) {
+    filtered = filtered.filter(m => m.material.toLowerCase().includes(materialFilter));
+  }
+
+  // Filtrar por status
+  if (statusFilter) {
+    filtered = filtered.filter(m => {
+      if (statusFilter === 'zerado') {
+        return m.total <= 0;
+      }
+      return m.status === statusFilter;
+    });
+  }
+
+  // Ordenar
+  switch (ordenarFilter) {
+    case 'nome':
+      filtered.sort((a, b) => a.material.localeCompare(b.material));
+      break;
+    case 'nome-desc':
+      filtered.sort((a, b) => b.material.localeCompare(a.material));
+      break;
+    case 'quantidade':
+      filtered.sort((a, b) => b.total - a.total);
+      break;
+    case 'quantidade-asc':
+      filtered.sort((a, b) => a.total - b.total);
+      break;
+  }
+
+  // Renderizar tabela filtrada
+  renderMateriaisList(filtered);
+  
+  // Mostrar contador se houver filtros ativos
+  const container = document.getElementById('materiaisListContainer');
+  if (container && filtered.length < allMateriaisCache.length) {
+    const countDiv = document.createElement('div');
+    countDiv.className = 'alert alert-info mt-3';
+    countDiv.innerHTML = `<i class="bi bi-info-circle"></i> Mostrando ${filtered.length} de ${allMateriaisCache.length} materiais`;
+    container.appendChild(countDiv);
+  }
+}
+
+function clearMateriaisFilters(): void {
+  (document.getElementById('filterMaterialEstoque') as HTMLInputElement).value = '';
+  (document.getElementById('filterStatusEstoque') as HTMLSelectElement).value = '';
+  (document.getElementById('filterOrdenarEstoque') as HTMLSelectElement).value = 'nome';
+  applyMateriaisFilters();
+}
+
+function setupMateriaisFilters(): void {
+  const filterMaterial = document.getElementById('filterMaterialEstoque');
+  const filterStatus = document.getElementById('filterStatusEstoque');
+  const filterOrdenar = document.getElementById('filterOrdenarEstoque');
+
+  if (filterMaterial) {
+    filterMaterial.addEventListener('input', applyMateriaisFilters);
+  }
+  if (filterStatus) {
+    filterStatus.addEventListener('change', applyMateriaisFilters);
+  }
+  if (filterOrdenar) {
+    filterOrdenar.addEventListener('change', applyMateriaisFilters);
+  }
+}
+
 async function submitStock(event: Event): Promise<void> {
   event.preventDefault();
 
@@ -749,7 +826,8 @@ async function loadData(): Promise<void> {
     allRecordsCache = allRecords; // Armazenar no cache para filtros
     renderTable(allRecords, 'tableContainer');
     
-    // Renderizar lista de materiais na aba de novo registro
+    // Renderizar lista de materiais na aba de estoque
+    allMateriaisCache = materiais; // Armazenar no cache para filtros
     renderMateriaisList(materiais);
     
     // Renderizar configurações de materiais
@@ -1285,6 +1363,7 @@ async function confirmarExclusaoMaterial(): Promise<void> {
 (window as any).salvarConfigMaterial = salvarConfigMaterial;
 (window as any).salvarTodasConfigs = salvarTodasConfigs;
 (window as any).clearFilters = clearFilters;
+(window as any).clearMateriaisFilters = clearMateriaisFilters;
 (window as any).editarMaterial = editarMaterial;
 (window as any).excluirMaterial = excluirMaterial;
 (window as any).salvarEdicaoMaterial = salvarEdicaoMaterial;
@@ -1301,6 +1380,7 @@ async function init(): Promise<void> {
   
   // Setup filters
   setupFilters();
+  setupMateriaisFilters();
 
   await loadData();
 }
