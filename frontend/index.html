@@ -6,13 +6,14 @@
   <title>Bergano - Sistema de Gestão de Estoque</title>
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <style>
     :root {
-      /* Paleta original (azul + ciano + amarelo) */
-      --primary-color: #0b4f78;    /* azul-escuro */
-      --primary-dark: #08374f;    /* azul mais escuro */
-      --secondary-color: #00a3e0;  /* azul ciano */
-      --accent-color: #ffb400;     /* amarelo/dourado de destaque */
+      /* Paleta de cores */
+      --primary-color: #0b4f78;
+      --primary-dark: #08374f;
+      --secondary-color: #00a3e0;
+      --accent-color: #ffb400;
       --success-color: #10b981;
       --danger-color: #ef4444;
       --warning-color: #f59e0b;
@@ -20,6 +21,28 @@
       --bg-light: #f7fafc;
       --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
       --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+      
+      /* Tipografia padronizada */
+      --font-size-xs: 0.75rem;      /* 12px */
+      --font-size-sm: 0.875rem;     /* 14px */
+      --font-size-base: 1rem;       /* 16px */
+      --font-size-lg: 1.125rem;     /* 18px */
+      --font-size-xl: 1.25rem;      /* 20px */
+      --font-size-2xl: 1.5rem;      /* 24px */
+      --font-size-3xl: 1.875rem;    /* 30px */
+      
+      /* Espaçamentos padronizados */
+      --spacing-xs: 0.5rem;         /* 8px */
+      --spacing-sm: 0.75rem;        /* 12px */
+      --spacing-md: 1rem;           /* 16px */
+      --spacing-lg: 1.5rem;         /* 24px */
+      --spacing-xl: 2rem;           /* 32px */
+      
+      /* Cards e bordas */
+      --card-padding: 1.5rem;
+      --card-border-radius: 12px;
+      --input-border-radius: 8px;
+      --button-border-radius: 8px;
     }
 
     * {
@@ -33,7 +56,9 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       min-height: 100vh;
       overflow-x: hidden;
-      font-size: 16px;
+      font-size: var(--font-size-base);
+      line-height: 1.5;
+      color: #1e293b;
     }
 
     .d-flex {
@@ -94,23 +119,57 @@
       padding: 0.875rem 1.25rem;
       color: #475569;
       text-decoration: none;
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       font-size: 1rem;
       font-weight: 500;
       border-left: 3px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sidebar-link::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, rgba(11, 79, 120, 0.08) 0%, transparent 100%);
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 0;
+    }
+
+    .sidebar-link:hover::before {
+      width: 100%;
     }
 
     .sidebar-link:hover {
       background-color: #f8fafc;
       color: var(--primary-color);
       border-left-color: var(--primary-color);
+      padding-left: 1.5rem;
+      box-shadow: inset 0 0 0 1px rgba(11, 79, 120, 0.1);
+    }
+
+    .sidebar-link:hover .sidebar-icon {
+      transform: scale(1.15) rotate(5deg);
     }
 
     .sidebar-link.active {
-      background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, transparent 100%);
+      background: linear-gradient(90deg, rgba(11, 79, 120, 0.12) 0%, rgba(11, 79, 120, 0.02) 100%);
       color: var(--primary-color);
       border-left-color: var(--primary-color);
       font-weight: 600;
+      box-shadow: inset 0 0 0 1px rgba(11, 79, 120, 0.15);
+    }
+
+    .sidebar-link.active .sidebar-icon {
+      transform: scale(1.1);
+    }
+
+    .sidebar-link span {
+      position: relative;
+      z-index: 1;
     }
 
     .sidebar-icon {
@@ -118,6 +177,22 @@
       margin-right: 0.875rem;
       width: 24px;
       text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      z-index: 1;
+    }
+
+    .sidebar-icon i {
+      font-size: 1.25rem;
+      line-height: 1;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar-link:hover .sidebar-icon i {
+      color: var(--primary-color);
     }
 
     .sidebar-footer {
@@ -130,6 +205,15 @@
       display: flex;
       align-items: center;
       gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .sidebar-user:hover {
+      background: rgba(11, 79, 120, 0.05);
+      transform: translateX(3px);
     }
 
     .sidebar-user-icon {
@@ -140,7 +224,25 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.25rem;
+      font-size: 1.5rem;
+      color: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(11, 79, 120, 0.2);
+    }
+
+    .sidebar-user:hover .sidebar-user-icon {
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 0 4px 12px rgba(11, 79, 120, 0.3);
+    }
+
+    .sidebar-user-icon i {
+      font-size: 1.5rem;
+      line-height: 1;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-user:hover .sidebar-user-icon i {
+      transform: scale(1.05);
     }
 
     .sidebar-user-info {
@@ -179,19 +281,23 @@
 
     /* Seções */
     .section {
-      margin-bottom: 2.5rem;
+      margin-bottom: var(--spacing-xl);
     }
 
     .section-title {
-      font-size: 1.5rem;
+      font-size: var(--font-size-2xl);
       font-weight: 600;
       color: #1e293b;
-      margin-bottom: 1.5rem;
-      padding-bottom: 0.75rem;
+      margin-bottom: var(--spacing-lg);
+      padding-bottom: var(--spacing-sm);
       border-bottom: 2px solid #e2e8f0;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: var(--spacing-xs);
+    }
+    
+    .section-title i {
+      font-size: var(--font-size-2xl);
     }
 
     @keyframes fadeIn {
@@ -199,11 +305,42 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Animações de transição entre abas */
+    @keyframes sectionFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes sectionFadeOut {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(-15px);
+      }
+    }
+
+    .fade-in {
+      animation: sectionFadeIn 0.3s ease-out forwards;
+    }
+
+    .fade-out {
+      animation: sectionFadeOut 0.2s ease-in forwards;
+    }
+
     .card {
       border: none;
       box-shadow: var(--card-shadow);
       margin-bottom: 0;
-      border-radius: 12px;
+      border-radius: var(--card-border-radius);
       transition: all 0.3s ease;
       background: white;
       overflow: hidden;
@@ -214,24 +351,28 @@
       box-shadow: var(--card-shadow-hover);
       transform: translateY(-2px);
     }
-
+    
+    .card-body {
+      padding: var(--card-padding);
+    }
+    
     .card-title {
       font-weight: 600;
       color: #1e293b;
-      margin-bottom: 1.5rem;
-      font-size: 1.125rem;
+      margin-bottom: var(--spacing-lg);
+      font-size: var(--font-size-lg);
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: var(--spacing-xs);
     }
-
-    .card-body {
-      padding: 1.5rem;
+    
+    .card-title i {
+      font-size: var(--font-size-lg);
     }
 
     .stat-card {
       text-align: center;
-      padding: 2rem 1rem;
+      padding: var(--spacing-xl) var(--spacing-md);
       position: relative;
       overflow: hidden;
       border-left: 4px solid transparent;
@@ -239,7 +380,7 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      min-height: 120px;
+      min-height: 140px;
     }
 
     .row > .col-md-3:nth-child(1) .stat-card {
@@ -263,19 +404,27 @@
     }
 
     .stat-number {
-      font-size: 3rem;
+      font-size: var(--font-size-3xl);
       font-weight: 700;
       color: inherit;
       line-height: 1;
-      margin-bottom: 0.5rem;
+      margin-bottom: var(--spacing-xs);
     }
 
     .stat-label {
       color: #64748b;
-      font-size: 0.9375rem;
-      font-weight: 500;
+      font-size: var(--font-size-sm);
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.375rem;
+    }
+    
+    .stat-label i {
+      font-size: var(--font-size-sm);
     }
 
     .text-success .stat-number { color: inherit; }
@@ -283,18 +432,18 @@
 
     .form-section {
       background: white;
-      padding: 2rem 2.5rem;
-      border-radius: 12px;
+      padding: var(--card-padding);
+      border-radius: var(--card-border-radius);
       box-shadow: var(--card-shadow);
     }
 
     .form-section h5 {
       color: #1e293b;
       font-weight: 600;
-      margin-bottom: 2rem;
+      margin-bottom: var(--spacing-lg);
       padding-bottom: 0;
       border-bottom: none;
-      font-size: 1.1rem;
+      font-size: var(--font-size-lg);
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -303,94 +452,112 @@
     .form-label {
       font-weight: 500;
       color: #475569;
-      margin-bottom: 0.5rem;
-      font-size: 0.9375rem;
+      margin-bottom: var(--spacing-xs);
+      font-size: var(--font-size-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+    }
+    
+    .form-label i {
+      font-size: var(--font-size-sm);
     }
 
     .form-control, .form-select {
       border: 2px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 0.75rem 1rem;
+      border-radius: var(--input-border-radius);
+      padding: var(--spacing-sm) var(--spacing-md);
       transition: all 0.2s ease;
-      font-size: 1rem;
+      font-size: var(--font-size-base);
     }
 
     .form-control:focus, .form-select:focus {
       border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      box-shadow: 0 0 0 3px rgba(11, 79, 120, 0.1);
+      outline: none;
     }
 
     /* Sistema de Botões Modernos */
     .btn {
-      border-radius: 8px;
-      font-weight: 600;
-      transition: all 0.3s ease;
+      border-radius: var(--button-border-radius);
+      font-weight: 500;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       border: none;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
+      gap: var(--spacing-xs);
       cursor: pointer;
-      font-size: 1rem;
-      padding: 0.75rem 1.5rem;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      font-size: var(--font-size-sm);
+      padding: 0.625rem 1rem;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      line-height: 1.5;
+    }
+    
+    .btn i {
+      font-size: var(--font-size-sm);
     }
 
     .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
     }
 
     .btn:active {
       transform: translateY(0);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     }
 
     .btn:disabled {
-      opacity: 0.6;
+      opacity: 0.5;
       cursor: not-allowed;
       transform: none !important;
+      box-shadow: none !important;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      background: var(--primary-color);
       color: white;
     }
 
     .btn-primary:hover {
-      background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+      background: var(--primary-dark);
+      box-shadow: 0 4px 12px rgba(11, 79, 120, 0.3);
     }
 
     .btn-success {
-      background: linear-gradient(135deg, #10b981, #059669);
+      background: var(--success-color);
       color: white;
     }
 
     .btn-success:hover {
-      background: linear-gradient(135deg, #059669, #047857);
+      background: #059669;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
 
     .btn-danger {
-      background: linear-gradient(135deg, #ef4444, #dc2626);
+      background: var(--danger-color);
       color: white;
     }
 
     .btn-danger:hover {
-      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      background: #dc2626;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     }
 
     .btn-secondary {
-      background: linear-gradient(135deg, #64748b, #475569);
+      background: #64748b;
       color: white;
     }
 
     .btn-secondary:hover {
-      background: linear-gradient(135deg, #475569, #334155);
+      background: #475569;
+      box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);
     }
 
     .btn-outline-primary {
       background: transparent;
-      border: 2px solid var(--primary-color);
+      border: 1.5px solid var(--primary-color);
       color: var(--primary-color);
       box-shadow: none;
     }
@@ -398,29 +565,42 @@
     .btn-outline-primary:hover {
       background: var(--primary-color);
       color: white;
+      box-shadow: 0 4px 12px rgba(11, 79, 120, 0.2);
     }
 
     .btn-outline-secondary {
       background: transparent;
-      border: 2px solid #64748b;
+      border: 1.5px solid #cbd5e1;
       color: #64748b;
       box-shadow: none;
     }
 
     .btn-outline-secondary:hover {
-      background: #64748b;
-      color: white;
+      background: #f8fafc;
+      border-color: #94a3b8;
+      color: #475569;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
     /* Tamanhos de botões */
     .btn-sm {
-      padding: 0.5rem 1rem;
-      font-size: 0.9375rem;
+      padding: 0.5rem 0.875rem;
+      font-size: var(--font-size-xs);
+      gap: 0.375rem;
+    }
+    
+    .btn-sm i {
+      font-size: var(--font-size-xs);
     }
 
     .btn-lg {
-      padding: 1rem 2rem;
-      font-size: 1.125rem;
+      padding: 0.75rem 1.25rem;
+      font-size: var(--font-size-base);
+      gap: 0.5rem;
+    }
+    
+    .btn-lg i {
+      font-size: var(--font-size-base);
     }
 
     /* Botão com largura total */
@@ -430,22 +610,22 @@
 
     .badge-entrada {
       background-color: var(--success-color);
-      padding: 0.5rem 0.875rem;
-      border-radius: 6px;
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: var(--input-border-radius);
       font-weight: 600;
-      font-size: 0.8125rem;
+      font-size: var(--font-size-sm);
     }
 
     .badge-saida {
       background-color: var(--danger-color);
-      padding: 0.5rem 0.875rem;
-      border-radius: 6px;
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: var(--input-border-radius);
       font-weight: 600;
-      font-size: 0.8125rem;
+      font-size: var(--font-size-sm);
     }
 
     .table {
-      font-size: 1.0625rem;
+      font-size: var(--font-size-base);
     }
 
     .table thead {
@@ -457,9 +637,9 @@
       font-weight: 600;
       color: #475569;
       text-transform: uppercase;
-      font-size: 0.875rem;
+      font-size: var(--font-size-sm);
       letter-spacing: 0.5px;
-      padding: 1.125rem 1rem;
+      padding: var(--spacing-md);
     }
 
     .table tbody tr {
@@ -471,13 +651,14 @@
     }
 
     .table tbody td {
-      padding: 1rem 1rem;
+      padding: var(--spacing-md);
       vertical-align: middle;
-      font-size: 1.0625rem;
+      font-size: var(--font-size-base);
     }
 
     .table tbody td strong {
-      font-size: 1.125rem;
+      font-size: var(--font-size-base);
+      font-weight: 600;
     }
 
     .table tbody td small {
@@ -504,24 +685,104 @@
       font-size: 1rem !important;
     }
 
-    .badge.rounded-pill {
-      padding: 0.5rem 0.875rem;
+    .badge {
+      padding: 0.375rem 0.75rem;
       font-weight: 600;
-      font-size: 1rem;
+      font-size: var(--font-size-xs);
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
     }
 
-    .badge.bg-success,
-    .badge.bg-danger,
-    .badge.bg-warning,
-    .badge.bg-secondary,
+    .badge.rounded-pill {
+      border-radius: 50px;
+    }
+
+    .badge.bg-success {
+      background-color: var(--success-color) !important;
+    }
+
+    .badge.bg-danger {
+      background-color: var(--danger-color) !important;
+    }
+
+    .badge.bg-warning {
+      background-color: var(--warning-color) !important;
+    }
+
+    .badge.bg-secondary {
+      background-color: #64748b !important;
+    }
+
     .badge.bg-info {
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-      font-weight: 600;
+      background-color: var(--info-color) !important;
     }
 
     #chartCanvas {
       max-height: 350px;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .btn-action {
+      background: transparent;
+      border: 1.5px solid #e2e8f0;
+      color: #64748b;
+      padding: 0.375rem 0.625rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px;
+      height: 32px;
+    }
+
+    .btn-action:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-action.btn-edit {
+      border-color: var(--info-color);
+      color: var(--info-color);
+    }
+
+    .btn-action.btn-edit:hover {
+      background: var(--info-color);
+      color: white;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-action.btn-delete {
+      border-color: var(--danger-color);
+      color: var(--danger-color);
+    }
+
+    .btn-action.btn-delete:hover {
+      background: var(--danger-color);
+      color: white;
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-action.btn-save {
+      border-color: var(--success-color);
+      color: var(--success-color);
+    }
+
+    .btn-action.btn-save:hover {
+      background: var(--success-color);
+      color: white;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
     }
 
     /* Grid spacing */
@@ -912,9 +1173,217 @@
       font-size: 1rem !important;
       padding: 0.625rem 0.875rem !important;
     }
+
+    /* Toast Notifications */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .toast {
+      pointer-events: auto;
+      background: white;
+      border-radius: 12px;
+      padding: 16px 20px;
+      min-width: 320px;
+      max-width: 420px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border-left: 4px solid;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .toast.toast-success {
+      border-left-color: var(--success-color);
+    }
+
+    .toast.toast-error {
+      border-left-color: var(--danger-color);
+    }
+
+    .toast.toast-warning {
+      border-left-color: var(--warning-color);
+    }
+
+    .toast.toast-info {
+      border-left-color: var(--info-color);
+    }
+
+    .toast::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      width: 100%;
+      background: currentColor;
+      opacity: 0.2;
+      animation: toastProgress 4s linear forwards;
+    }
+
+    .toast.toast-success::before {
+      background: var(--success-color);
+    }
+
+    .toast.toast-error::before {
+      background: var(--danger-color);
+    }
+
+    .toast.toast-warning::before {
+      background: var(--warning-color);
+    }
+
+    .toast.toast-info::before {
+      background: var(--info-color);
+    }
+
+    .toast-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.2s backwards;
+    }
+
+    .toast.toast-success .toast-icon {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success-color);
+    }
+
+    .toast.toast-error .toast-icon {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger-color);
+    }
+
+    .toast.toast-warning .toast-icon {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--warning-color);
+    }
+
+    .toast.toast-info .toast-icon {
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--info-color);
+    }
+
+    .toast-content {
+      flex: 1;
+      padding-right: 8px;
+    }
+
+    .toast-title {
+      font-weight: 600;
+      font-size: 15px;
+      color: #1e293b;
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+
+    .toast-message {
+      font-size: 14px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .toast-close {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .toast-close:hover {
+      background: rgba(0, 0, 0, 0.05);
+      color: #475569;
+    }
+
+    .toast.removing {
+      animation: slideOutRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOutRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+
+    @keyframes scaleIn {
+      from {
+        transform: scale(0);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes toastProgress {
+      from {
+        width: 100%;
+      }
+      to {
+        width: 0%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .toast-container {
+        left: 20px;
+        right: 20px;
+      }
+
+      .toast {
+        min-width: auto;
+        max-width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
   <nav class="navbar navbar-dark">
     <div class="container-fluid">
       <a class="navbar-brand mb-0 h1" href="#" style="display:flex;align-items:center;gap:0.5rem;">
@@ -934,35 +1403,35 @@
       </div>
       <nav class="sidebar-nav">
         <a href="#dashboard" class="sidebar-link active">
-          <span class="sidebar-icon">📊</span>
+          <span class="sidebar-icon"><i class="bi bi-speedometer2"></i></span>
           <span>Dashboard</span>
         </a>
         <a href="#novo" class="sidebar-link">
-          <span class="sidebar-icon">➕</span>
+          <span class="sidebar-icon"><i class="bi bi-plus-circle"></i></span>
           <span>Novo Registro</span>
         </a>
         <a href="#estoque" class="sidebar-link">
-          <span class="sidebar-icon">📦</span>
+          <span class="sidebar-icon"><i class="bi bi-box-seam"></i></span>
           <span>Estoque</span>
         </a>
         <a href="#historico" class="sidebar-link">
-          <span class="sidebar-icon">📋</span>
+          <span class="sidebar-icon"><i class="bi bi-clock-history"></i></span>
           <span>Histórico</span>
         </a>
         <a href="#relatorios" class="sidebar-link">
-          <span class="sidebar-icon">📈</span>
+          <span class="sidebar-icon"><i class="bi bi-graph-up-arrow"></i></span>
           <span>Relatórios</span>
         </a>
         <a href="#configuracoes" class="sidebar-link">
-          <span class="sidebar-icon">⚙️</span>
+          <span class="sidebar-icon"><i class="bi bi-gear"></i></span>
           <span>Configurações</span>
         </a>
       </nav>
       <div class="sidebar-footer">
         <div class="sidebar-user">
-          <div class="sidebar-user-icon">👤</div>
+          <div class="sidebar-user-icon"><i class="bi bi-person-circle"></i></div>
           <div class="sidebar-user-info">
-            <div class="sidebar-user-name">João</div>
+            <div class="sidebar-user-name">Usuário</div>
             <div class="sidebar-user-role">Administrador</div>
           </div>
         </div>
@@ -980,26 +1449,26 @@
         <div class="row mb-4">
           <div class="col-md-3">
             <div class="card stat-card">
-              <div class="stat-number" id="totalMateriais">0</div>
-              <div class="stat-label">Materiais</div>
+              <div class="stat-number" id="valorTotal">R$ 0</div>
+              <div class="stat-label"><i class="bi bi-currency-dollar"></i> Valor Total</div>
             </div>
           </div>
           <div class="col-md-3">
             <div class="card stat-card">
-              <div class="stat-number" id="totalRegistros">0</div>
-              <div class="stat-label">Registros</div>
+              <div class="stat-number" id="materiaisAlerta">0</div>
+              <div class="stat-label"><i class="bi bi-exclamation-triangle"></i> Em Alerta</div>
             </div>
           </div>
           <div class="col-md-3">
             <div class="card stat-card">
-              <div class="stat-number text-success" id="totalEntradas">0</div>
-              <div class="stat-label">Entradas</div>
+              <div class="stat-number" id="taxaGiro">0%</div>
+              <div class="stat-label"><i class="bi bi-arrow-repeat"></i> Taxa de Giro</div>
             </div>
           </div>
           <div class="col-md-3">
             <div class="card stat-card">
-              <div class="stat-number text-danger" id="totalSaidas">0</div>
-              <div class="stat-label">Saídas</div>
+              <div class="stat-number" id="materiaisZerados">0</div>
+              <div class="stat-label"><i class="bi bi-x-octagon"></i> Zerados</div>
             </div>
           </div>
         </div>
@@ -1009,7 +1478,7 @@
           <div class="col-md-8">
             <div class="card">
               <div class="card-body">
-                <h5 class="card-title">📊 Estoque por Material</h5>
+                <h5 class="card-title"><i class="bi bi-bar-chart-line"></i> Estoque por Material</h5>
                 <canvas id="dashboardChartCanvas"></canvas>
               </div>
             </div>
@@ -1017,7 +1486,7 @@
           <div class="col-md-4">
             <div class="card">
               <div class="card-body">
-                <h5 class="card-title">📦 Resumo do Estoque</h5>
+                <h5 class="card-title"><i class="bi bi-box-seam"></i> Resumo do Estoque</h5>
                 <div id="dashboardSummaryContainer">Carregando...</div>
               </div>
             </div>
@@ -1029,7 +1498,7 @@
           <div class="col-md-6">
             <div class="card">
               <div class="card-body">
-                <h5 class="card-title">📈 Entradas vs Saídas</h5>
+                <h5 class="card-title"><i class="bi bi-arrow-left-right"></i> Entradas vs Saídas</h5>
                 <canvas id="entradaSaidaChart"></canvas>
               </div>
             </div>
@@ -1037,7 +1506,7 @@
           <div class="col-md-6">
             <div class="card">
               <div class="card-body">
-                <h5 class="card-title">🥧 Distribuição de Materiais</h5>
+                <h5 class="card-title"><i class="bi bi-pie-chart"></i> Distribuição de Materiais</h5>
                 <canvas id="distribuicaoChart"></canvas>
               </div>
             </div>
@@ -1049,7 +1518,7 @@
           <div class="col-12">
             <div class="card">
               <div class="card-body">
-                <h5 class="card-title">📋 Últimas Movimentações</h5>
+                <h5 class="card-title"><i class="bi bi-list-ul"></i> Últimas Movimentações</h5>
                 <div id="dashboardTableContainer">Carregando...</div>
               </div>
             </div>
@@ -1060,7 +1529,7 @@
       <!-- Formulário de Registro -->
       <div id="novo" class="section">
           <div class="form-section">
-            <h5 class="mb-3">📝 Novo Registro</h5>
+            <h5 class="mb-3"><i class="bi bi-pencil-square"></i> Novo Registro</h5>
             <form id="stockForm">
               <div class="row">
                 <div class="col-md-3 mb-3">
@@ -1101,33 +1570,21 @@
                   <input type="text" class="form-control" id="message" placeholder="Informações adicionais">
                 </div>
                 <div class="col-md-3 mb-3 d-flex align-items-end">
-                  <button type="submit" class="btn btn-primary btn-lg w-100">✅ Registrar</button>
+                  <button type="submit" class="btn btn-primary btn-lg w-100"><i class="bi bi-check-circle"></i> Registrar</button>
                 </div>
               </div>
             </form>
-        </div>
-
-        <!-- Lista de Materiais em Estoque -->
-        <div class="row mt-4">
-          <div class="col-12">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title">📦 Materiais em Estoque</h5>
-                <div id="materiaisListContainer">Carregando...</div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
       <!-- Gráfico e Resumo -->
       <div id="estoque" class="section">
-        <h2 class="section-title">📊 Visão Geral do Estoque</h2>
+        <h2 class="section-title"><i class="bi bi-bar-chart-line"></i> Visão Geral do Estoque</h2>
         <div class="row">
         <div class="col-md-8">
           <div class="card">
             <div class="card-body">
-              <h5 class="card-title">📊 Estoque por Material</h5>
+              <h5 class="card-title"><i class="bi bi-bar-chart-line"></i> Estoque por Material</h5>
               <canvas id="chartCanvas"></canvas>
             </div>
           </div>
@@ -1135,28 +1592,74 @@
         <div class="col-md-4">
           <div class="card">
             <div class="card-body">
-              <h5 class="card-title">📦 Resumo do Estoque</h5>
+              <h5 class="card-title"><i class="bi bi-box-seam"></i> Resumo do Estoque</h5>
               <div id="summaryContainer">Carregando...</div>
             </div>
           </div>
+          </div>
+        </div>
+
+        <!-- Lista de Materiais em Estoque -->
+        <div class="row mt-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title mb-4"><i class="bi bi-box-seam"></i> Materiais em Estoque</h5>
+                
+                <!-- Filtros -->
+                <div class="row g-3 mb-4">
+                  <div class="col-md-4">
+                    <label class="form-label"><i class="bi bi-search"></i> Buscar Material</label>
+                    <input type="text" class="form-control" id="filterMaterialEstoque" placeholder="Digite o nome do material...">
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label"><i class="bi bi-funnel"></i> Status</label>
+                    <select class="form-select" id="filterStatusEstoque">
+                      <option value="">Todos</option>
+                      <option value="normal">Normal</option>
+                      <option value="baixo">Estoque Baixo</option>
+                      <option value="alto">Estoque Alto</option>
+                      <option value="zerado">Zerado</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label"><i class="bi bi-sort-down"></i> Ordenar por</label>
+                    <select class="form-select" id="filterOrdenarEstoque">
+                      <option value="nome">Nome (A-Z)</option>
+                      <option value="nome-desc">Nome (Z-A)</option>
+                      <option value="quantidade">Quantidade (Maior)</option>
+                      <option value="quantidade-asc">Quantidade (Menor)</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-outline-secondary w-100" onclick="clearMateriaisFilters()" title="Limpar filtros">
+                      <i class="bi bi-arrow-clockwise"></i> Limpar
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Lista de Materiais -->
+                <div id="materiaisListContainer">Carregando...</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Tabela de Registros -->
       <div id="historico" class="section">
-        <h2 class="section-title">📋 Histórico de Movimentações</h2>
+        <h2 class="section-title"><i class="bi bi-clock-history"></i> Histórico de Movimentações</h2>
         
         <!-- Filtros -->
         <div class="card mb-3">
           <div class="card-body">
             <div class="row g-3">
               <div class="col-md-4">
-                <label class="form-label">🔍 Buscar Material</label>
+                <label class="form-label"><i class="bi bi-search"></i> Buscar Material</label>
                 <input type="text" class="form-control" id="filterMaterial" placeholder="Digite o nome do material...">
               </div>
               <div class="col-md-3">
-                <label class="form-label">📦 Tipo</label>
+                <label class="form-label"><i class="bi bi-filter"></i> Tipo</label>
                 <select class="form-select" id="filterType">
                   <option value="">Todos</option>
                   <option value="entrada">Entrada</option>
@@ -1164,7 +1667,7 @@
                 </select>
               </div>
               <div class="col-md-3">
-                <label class="form-label">📅 Período</label>
+                <label class="form-label"><i class="bi bi-calendar3"></i> Período</label>
                 <select class="form-select" id="filterPeriod">
                   <option value="all">Todos</option>
                   <option value="today">Hoje</option>
@@ -1174,7 +1677,7 @@
               </div>
               <div class="col-md-2 d-flex align-items-end">
                 <button class="btn btn-outline-secondary w-100" onclick="clearFilters()" title="Limpar todos os filtros">
-                  🔄 Limpar
+                  <i class="bi bi-arrow-clockwise"></i> Limpar
                 </button>
               </div>
             </div>
@@ -1190,24 +1693,24 @@
 
       <!-- Relatórios -->
       <div id="relatorios" class="section">
-        <h2 class="section-title">📈 Relatórios</h2>
+        <h2 class="section-title"><i class="bi bi-graph-up-arrow"></i> Relatórios</h2>
         <div class="card">
           <div class="card-body">
             <p class="text-muted mb-4">Funcionalidade de relatórios em desenvolvimento...</p>
             <div class="row">
                 <div class="col-md-4 mb-3">
                   <button class="btn btn-outline-primary btn-lg w-100" disabled>
-                    📊 Relatório de Movimentações
+                    <i class="bi bi-file-earmark-bar-graph"></i> Relatório de Movimentações
                   </button>
                 </div>
                 <div class="col-md-4 mb-3">
                   <button class="btn btn-outline-primary btn-lg w-100" disabled>
-                    📦 Relatório de Estoque Atual
+                    <i class="bi bi-box-seam"></i> Relatório de Estoque Atual
                   </button>
                 </div>
                 <div class="col-md-4 mb-3">
                   <button class="btn btn-outline-primary btn-lg w-100" disabled>
-                    📉 Relatório de Consumo
+                    <i class="bi bi-graph-down-arrow"></i> Relatório de Consumo
                   </button>
                 </div>
             </div>
@@ -1217,16 +1720,16 @@
 
       <!-- Configurações -->
       <div id="configuracoes" class="section">
-        <h2 class="section-title">⚙️ Configurações de Estoque</h2>
+        <h2 class="section-title"><i class="bi bi-gear"></i> Configurações de Estoque</h2>
         <div class="card">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-4">
               <div>
                 <p class="text-muted mb-2">Configure os limites mínimos e máximos de estoque para cada material.</p>
-                <p class="text-muted mb-0"><small>💡 O sistema alertará quando o estoque estiver abaixo do mínimo (🔴) ou acima do máximo (🟡).</small></p>
+                <p class="text-muted mb-0"><small><i class="bi bi-lightbulb"></i> O sistema alertará quando o estoque estiver abaixo do mínimo ou acima do máximo.</small></p>
               </div>
               <button class="btn btn-success btn-lg" onclick="salvarTodasConfigs()" style="white-space: nowrap;">
-                💾 Salvar Todas
+                <i class="bi bi-floppy"></i> Salvar Todas
               </button>
             </div>
             <div id="configMateriaisContainer">Carregando...</div>
@@ -1244,7 +1747,7 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">✏️ Editar Material</h5>
+          <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Editar Material</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
@@ -1283,8 +1786,8 @@
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">✖️ Cancelar</button>
-          <button type="button" class="btn btn-success" onclick="salvarEdicaoMaterial()">💾 Salvar Alterações</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Cancelar</button>
+          <button type="button" class="btn btn-success" onclick="salvarEdicaoMaterial()"><i class="bi bi-floppy"></i> Salvar Alterações</button>
         </div>
       </div>
     </div>
@@ -1295,20 +1798,20 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header bg-danger text-white">
-          <h5 class="modal-title">🗑️ Excluir Material</h5>
+          <h5 class="modal-title"><i class="bi bi-trash"></i> Excluir Material</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <input type="hidden" id="deleteMaterialId">
-          <p class="mb-3">⚠️ Tem certeza que deseja excluir o material:</p>
+          <p class="mb-3"><i class="bi bi-exclamation-triangle text-warning"></i> Tem certeza que deseja excluir o material:</p>
           <p class="text-center"><strong id="deleteMaterialNome" class="fs-5"></strong></p>
           <div class="alert alert-warning mt-3">
-            <small>💡 Se houver registros associados, o material será apenas desativado.</small>
+            <small><i class="bi bi-lightbulb"></i> Se houver registros associados, o material será apenas desativado.</small>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">✖️ Cancelar</button>
-          <button type="button" class="btn btn-danger" onclick="confirmarExclusaoMaterial()">🗑️ Confirmar Exclusão</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Cancelar</button>
+          <button type="button" class="btn btn-danger" onclick="confirmarExclusaoMaterial()"><i class="bi bi-trash"></i> Confirmar Exclusão</button>
         </div>
       </div>
     </div>

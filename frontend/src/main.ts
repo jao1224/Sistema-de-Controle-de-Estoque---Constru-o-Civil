@@ -1,5 +1,62 @@
 import Chart from 'chart.js/auto';
 
+// Toast Notification System
+type ToastType = 'success' | 'error' | 'warning' | 'info';
+
+interface ToastOptions {
+  title: string;
+  message?: string;
+  type: ToastType;
+  duration?: number;
+}
+
+function showToast(options: ToastOptions): void {
+  const { title, message, type, duration = 4000 } = options;
+  
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+
+  // Criar elemento do toast
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  
+  // Ícones para cada tipo
+  const icons = {
+    success: '<i class="bi bi-check-circle-fill"></i>',
+    error: '<i class="bi bi-x-circle-fill"></i>',
+    warning: '<i class="bi bi-exclamation-triangle-fill"></i>',
+    info: '<i class="bi bi-info-circle-fill"></i>'
+  };
+
+  toast.innerHTML = `
+    <div class="toast-icon">${icons[type]}</div>
+    <div class="toast-content">
+      <div class="toast-title">${escapeHtml(title)}</div>
+      ${message ? `<div class="toast-message">${escapeHtml(message)}</div>` : ''}
+    </div>
+    <button class="toast-close" aria-label="Fechar">×</button>
+  `;
+
+  // Adicionar ao container
+  container.appendChild(toast);
+
+  // Botão de fechar
+  const closeBtn = toast.querySelector('.toast-close');
+  closeBtn?.addEventListener('click', () => removeToast(toast));
+
+  // Auto-remover após duração
+  setTimeout(() => {
+    removeToast(toast);
+  }, duration);
+}
+
+function removeToast(toast: HTMLElement): void {
+  toast.classList.add('removing');
+  setTimeout(() => {
+    toast.remove();
+  }, 300);
+}
+
 interface DashboardData {
   labels: string[];
   values: number[];
@@ -10,6 +67,10 @@ interface DashboardData {
     totalEntradas: number;
     totalSaidas: number;
     lowStock: number;
+    totalValue: number;
+    materiaisAlerta: number;
+    taxaGiro: number;
+    materiaisZerados: number;
   };
 }
 
@@ -587,6 +648,83 @@ function renderMateriaisList(materiais: MaterialSummary[]): void {
   container.appendChild(table);
 }
 
+// Variável global para armazenar todos os materiais
+let allMateriaisCache: MaterialSummary[] = [];
+
+function applyMateriaisFilters(): void {
+  const materialFilter = (document.getElementById('filterMaterialEstoque') as HTMLInputElement)?.value.toLowerCase() || '';
+  const statusFilter = (document.getElementById('filterStatusEstoque') as HTMLSelectElement)?.value || '';
+  const ordenarFilter = (document.getElementById('filterOrdenarEstoque') as HTMLSelectElement)?.value || 'nome';
+
+  let filtered = [...allMateriaisCache];
+
+  // Filtrar por nome do material
+  if (materialFilter) {
+    filtered = filtered.filter(m => m.material.toLowerCase().includes(materialFilter));
+  }
+
+  // Filtrar por status
+  if (statusFilter) {
+    filtered = filtered.filter(m => {
+      if (statusFilter === 'zerado') {
+        return m.total <= 0;
+      }
+      return m.status === statusFilter;
+    });
+  }
+
+  // Ordenar
+  switch (ordenarFilter) {
+    case 'nome':
+      filtered.sort((a, b) => a.material.localeCompare(b.material));
+      break;
+    case 'nome-desc':
+      filtered.sort((a, b) => b.material.localeCompare(a.material));
+      break;
+    case 'quantidade':
+      filtered.sort((a, b) => b.total - a.total);
+      break;
+    case 'quantidade-asc':
+      filtered.sort((a, b) => a.total - b.total);
+      break;
+  }
+
+  // Renderizar tabela filtrada
+  renderMateriaisList(filtered);
+  
+  // Mostrar contador se houver filtros ativos
+  const container = document.getElementById('materiaisListContainer');
+  if (container && filtered.length < allMateriaisCache.length) {
+    const countDiv = document.createElement('div');
+    countDiv.className = 'alert alert-info mt-3';
+    countDiv.innerHTML = `<i class="bi bi-info-circle"></i> Mostrando ${filtered.length} de ${allMateriaisCache.length} materiais`;
+    container.appendChild(countDiv);
+  }
+}
+
+function clearMateriaisFilters(): void {
+  (document.getElementById('filterMaterialEstoque') as HTMLInputElement).value = '';
+  (document.getElementById('filterStatusEstoque') as HTMLSelectElement).value = '';
+  (document.getElementById('filterOrdenarEstoque') as HTMLSelectElement).value = 'nome';
+  applyMateriaisFilters();
+}
+
+function setupMateriaisFilters(): void {
+  const filterMaterial = document.getElementById('filterMaterialEstoque');
+  const filterStatus = document.getElementById('filterStatusEstoque');
+  const filterOrdenar = document.getElementById('filterOrdenarEstoque');
+
+  if (filterMaterial) {
+    filterMaterial.addEventListener('input', applyMateriaisFilters);
+  }
+  if (filterStatus) {
+    filterStatus.addEventListener('change', applyMateriaisFilters);
+  }
+  if (filterOrdenar) {
+    filterOrdenar.addEventListener('change', applyMateriaisFilters);
+  }
+}
+
 async function submitStock(event: Event): Promise<void> {
   event.preventDefault();
 
@@ -617,23 +755,39 @@ async function submitStock(event: Event): Promise<void> {
 
     if (!response.ok) {
       // Mostrar mensagem de erro específica do backend
-      alert(`❌ Erro: ${data.error || 'Não foi possível registrar a movimentação'}`);
+      showToast({
+        title: 'Erro ao registrar',
+        message: data.error || 'Não foi possível registrar a movimentação',
+        type: 'error'
+      });
       return;
     }
 
     if (!data.ok) {
       // Caso o backend retorne ok: false
-      alert(`❌ Erro: ${data.error || 'Não foi possível registrar a movimentação'}`);
+      showToast({
+        title: 'Erro ao registrar',
+        message: data.error || 'Não foi possível registrar a movimentação',
+        type: 'error'
+      });
       return;
     }
 
     // Sucesso
     (document.getElementById('stockForm') as HTMLFormElement).reset();
     await loadData();
-    alert('✅ Registro adicionado com sucesso!');
+    showToast({
+      title: 'Registro adicionado!',
+      message: `${material} registrado com sucesso`,
+      type: 'success'
+    });
   } catch (error) {
     console.error('Erro:', error);
-    alert('❌ Erro ao conectar com o servidor. Verifique sua conexão.');
+    showToast({
+      title: 'Erro de conexão',
+      message: 'Não foi possível conectar ao servidor',
+      type: 'error'
+    });
   }
 }
 
@@ -650,15 +804,23 @@ async function loadData(): Promise<void> {
     
     // Atualizar estatísticas usando os dados do dashboard
     if (dashboardData.stats) {
-      const totalMateriaisEl = document.getElementById('totalMateriais');
-      const totalRegistrosEl = document.getElementById('totalRegistros');
-      const totalEntradasEl = document.getElementById('totalEntradas');
-      const totalSaidasEl = document.getElementById('totalSaidas');
+      const valorTotalEl = document.getElementById('valorTotal');
+      const materiaisAlertaEl = document.getElementById('materiaisAlerta');
+      const taxaGiroEl = document.getElementById('taxaGiro');
+      const materiaisZeradosEl = document.getElementById('materiaisZerados');
 
-      if (totalMateriaisEl) totalMateriaisEl.textContent = dashboardData.stats.totalMaterials.toString();
-      if (totalRegistrosEl) totalRegistrosEl.textContent = dashboardData.stats.totalRecords.toString();
-      if (totalEntradasEl) totalEntradasEl.textContent = dashboardData.stats.totalEntradas.toString();
-      if (totalSaidasEl) totalSaidasEl.textContent = dashboardData.stats.totalSaidas.toString();
+      if (valorTotalEl) {
+        const valorFormatado = dashboardData.stats.totalValue.toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0
+        });
+        valorTotalEl.textContent = valorFormatado;
+      }
+      if (materiaisAlertaEl) materiaisAlertaEl.textContent = dashboardData.stats.materiaisAlerta.toString();
+      if (taxaGiroEl) taxaGiroEl.textContent = `${dashboardData.stats.taxaGiro}%`;
+      if (materiaisZeradosEl) materiaisZeradosEl.textContent = dashboardData.stats.materiaisZerados.toString();
     }
     
     // Renderizar no dashboard principal
@@ -676,7 +838,8 @@ async function loadData(): Promise<void> {
     allRecordsCache = allRecords; // Armazenar no cache para filtros
     renderTable(allRecords, 'tableContainer');
     
-    // Renderizar lista de materiais na aba de novo registro
+    // Renderizar lista de materiais na aba de estoque
+    allMateriaisCache = materiais; // Armazenar no cache para filtros
     renderMateriaisList(materiais);
     
     // Renderizar configurações de materiais
@@ -713,16 +876,28 @@ function setupSidebarNavigation(): void {
       activeLink.classList.add('active');
     }
     
-    // Esconde todas as seções
+    // Esconde todas as seções com fade-out
     sections.forEach(section => {
-      (section as HTMLElement).style.display = 'none';
+      const htmlSection = section as HTMLElement;
+      htmlSection.classList.remove('fade-in');
+      htmlSection.classList.add('fade-out');
+      
+      // Aguardar animação antes de esconder
+      setTimeout(() => {
+        htmlSection.style.display = 'none';
+      }, 200);
     });
     
-    // Mostra apenas a seção solicitada
+    // Mostra apenas a seção solicitada com fade-in
     const targetSection = document.getElementById(sectionId);
     if (targetSection) {
-      targetSection.style.display = 'block';
-      console.log('Mostrando seção:', sectionId);
+      // Pequeno delay para garantir que o fade-out terminou
+      setTimeout(() => {
+        targetSection.style.display = 'block';
+        targetSection.classList.remove('fade-out');
+        targetSection.classList.add('fade-in');
+        console.log('Mostrando seção:', sectionId);
+      }, 200);
       
       // Salvar no localStorage
       localStorage.setItem('lastActiveSection', sectionId);
@@ -873,14 +1048,26 @@ async function salvarConfigMaterial(materialId: number): Promise<void> {
     const data = await response.json();
 
     if (response.ok && data.ok) {
-      alert('✅ Configuração salva com sucesso!');
+      showToast({
+        title: 'Configuração salva!',
+        message: 'Limites de estoque atualizados',
+        type: 'success'
+      });
       await loadData();
     } else {
-      alert(`❌ Erro: ${data.error || 'Não foi possível salvar'}`);
+      showToast({
+        title: 'Erro ao salvar',
+        message: data.error || 'Não foi possível salvar',
+        type: 'error'
+      });
     }
   } catch (error) {
     console.error('Erro:', error);
-    alert('❌ Erro ao conectar com o servidor.');
+    showToast({
+      title: 'Erro de conexão',
+      message: 'Não foi possível conectar ao servidor',
+      type: 'error'
+    });
   }
 }
 
@@ -888,7 +1075,11 @@ async function salvarTodasConfigs(): Promise<void> {
   const rows = document.querySelectorAll('#configMateriaisContainer tbody tr');
   
   if (rows.length === 0) {
-    alert('⚠️ Nenhum material para configurar.');
+    showToast({
+      title: 'Nenhum material',
+      message: 'Não há materiais para configurar',
+      type: 'warning'
+    });
     return;
   }
 
@@ -938,15 +1129,27 @@ async function salvarTodasConfigs(): Promise<void> {
   }
 
   // Mostrar resultado
-  let mensagem = '';
-  if (sucessos > 0) {
-    mensagem += `✅ ${sucessos} material(is) configurado(s) com sucesso!\n`;
+  if (sucessos > 0 && erros === 0) {
+    showToast({
+      title: 'Configurações salvas!',
+      message: `${sucessos} material(is) configurado(s) com sucesso`,
+      type: 'success'
+    });
+  } else if (sucessos > 0 && erros > 0) {
+    showToast({
+      title: 'Parcialmente salvo',
+      message: `${sucessos} sucesso(s), ${erros} erro(s)`,
+      type: 'warning',
+      duration: 6000
+    });
+  } else if (erros > 0) {
+    showToast({
+      title: 'Erro ao salvar',
+      message: `${erros} erro(s) encontrado(s)`,
+      type: 'error',
+      duration: 6000
+    });
   }
-  if (erros > 0) {
-    mensagem += `\n❌ ${erros} erro(s):\n${errosMensagens.join('\n')}`;
-  }
-
-  alert(mensagem);
   
   // Recarregar dados
   await loadData();
@@ -1037,7 +1240,11 @@ async function editarMaterial(materialId: number): Promise<void> {
   const material = materiais.find(m => m.id === materialId);
   
   if (!material) {
-    alert('❌ Material não encontrado!');
+    showToast({
+      title: 'Material não encontrado',
+      message: 'Não foi possível localizar o material',
+      type: 'error'
+    });
     return;
   }
 
@@ -1063,7 +1270,11 @@ async function salvarEdicaoMaterial(): Promise<void> {
   const descricao = (document.getElementById('editMaterialDescricao') as HTMLTextAreaElement).value;
 
   if (!nome || !unidade) {
-    alert('❌ Nome e unidade são obrigatórios!');
+    showToast({
+      title: 'Campos obrigatórios',
+      message: 'Nome e unidade são obrigatórios',
+      type: 'warning'
+    });
     return;
   }
 
@@ -1089,14 +1300,26 @@ async function salvarEdicaoMaterial(): Promise<void> {
       const modal = (window as any).bootstrap.Modal.getInstance(document.getElementById('modalEditarMaterial'));
       modal.hide();
       
-      alert('✅ Material atualizado com sucesso!');
+      showToast({
+        title: 'Material atualizado!',
+        message: `${nome} foi atualizado com sucesso`,
+        type: 'success'
+      });
       await loadData();
     } else {
-      alert(`❌ Erro: ${data.error || 'Não foi possível atualizar'}`);
+      showToast({
+        title: 'Erro ao atualizar',
+        message: data.error || 'Não foi possível atualizar',
+        type: 'error'
+      });
     }
   } catch (error) {
     console.error('Erro:', error);
-    alert('❌ Erro ao conectar com o servidor.');
+    showToast({
+      title: 'Erro de conexão',
+      message: 'Não foi possível conectar ao servidor',
+      type: 'error'
+    });
   }
 }
 
@@ -1125,14 +1348,26 @@ async function confirmarExclusaoMaterial(): Promise<void> {
       const modal = (window as any).bootstrap.Modal.getInstance(document.getElementById('modalExcluirMaterial'));
       modal.hide();
       
-      alert('✅ Material excluído com sucesso!');
+      showToast({
+        title: 'Material excluído!',
+        message: 'Material removido com sucesso',
+        type: 'success'
+      });
       await loadData();
     } else {
-      alert(`❌ Erro: ${data.error || 'Não foi possível excluir'}`);
+      showToast({
+        title: 'Erro ao excluir',
+        message: data.error || 'Não foi possível excluir',
+        type: 'error'
+      });
     }
   } catch (error) {
     console.error('Erro:', error);
-    alert('❌ Erro ao conectar com o servidor.');
+    showToast({
+      title: 'Erro de conexão',
+      message: 'Não foi possível conectar ao servidor',
+      type: 'error'
+    });
   }
 }
 
@@ -1140,6 +1375,7 @@ async function confirmarExclusaoMaterial(): Promise<void> {
 (window as any).salvarConfigMaterial = salvarConfigMaterial;
 (window as any).salvarTodasConfigs = salvarTodasConfigs;
 (window as any).clearFilters = clearFilters;
+(window as any).clearMateriaisFilters = clearMateriaisFilters;
 (window as any).editarMaterial = editarMaterial;
 (window as any).excluirMaterial = excluirMaterial;
 (window as any).salvarEdicaoMaterial = salvarEdicaoMaterial;
@@ -1156,6 +1392,7 @@ async function init(): Promise<void> {
   
   // Setup filters
   setupFilters();
+  setupMateriaisFilters();
 
   await loadData();
 }

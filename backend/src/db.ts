@@ -265,6 +265,10 @@ export class DatabasePostgres {
       totalEntradas: number;
       totalSaidas: number;
       lowStock: number;
+      totalValue: number;
+      materiaisAlerta: number;
+      taxaGiro: number;
+      materiaisZerados: number;
     };
   }> {
     // Buscar resumo
@@ -321,9 +325,51 @@ export class DatabasePostgres {
          LEFT JOIN stock_records sr ON m.id = sr.material_id
          WHERE m.active = true
          GROUP BY m.id, m.min_stock
-         HAVING COALESCE(SUM(sr.quantity), 0) <= m.min_stock
+         HAVING COALESCE(SUM(sr.quantity), 0) <= m.min_stock AND COALESCE(SUM(sr.quantity), 0) > 0
        ) sub`
     );
+
+    // Contar materiais zerados
+    const zeradosResult = await this.pool.query(
+      `SELECT COUNT(*) as zerados
+       FROM (
+         SELECT 
+           m.id,
+           COALESCE(SUM(sr.quantity), 0) as total
+         FROM materials m
+         LEFT JOIN stock_records sr ON m.id = sr.material_id
+         WHERE m.active = true
+         GROUP BY m.id
+         HAVING COALESCE(SUM(sr.quantity), 0) <= 0
+       ) sub`
+    );
+
+    // Calcular valor total do estoque (assumindo preço médio de R$ 100 por unidade - pode ser melhorado)
+    // TODO: Adicionar campo 'price' na tabela materials para cálculo real
+    const valorTotalResult = await this.pool.query(
+      `SELECT COALESCE(SUM(total * 100), 0) as valor_total
+       FROM (
+         SELECT 
+           COALESCE(SUM(sr.quantity), 0) as total
+         FROM materials m
+         LEFT JOIN stock_records sr ON m.id = sr.material_id
+         WHERE m.active = true
+         GROUP BY m.id
+       ) sub`
+    );
+
+    // Calcular taxa de giro (últimos 30 dias)
+    const taxaGiroResult = await this.pool.query(
+      `SELECT 
+        COALESCE(SUM(CASE WHEN type = 'entrada' THEN quantity ELSE 0 END), 0) as entradas_30d,
+        COALESCE(SUM(CASE WHEN type = 'saida' THEN ABS(quantity) ELSE 0 END), 0) as saidas_30d
+       FROM stock_records
+       WHERE timestamp >= NOW() - INTERVAL '30 days'`
+    );
+
+    const entradas30d = parseFloat(taxaGiroResult.rows[0]?.entradas_30d || '0');
+    const saidas30d = parseFloat(taxaGiroResult.rows[0]?.saidas_30d || '0');
+    const taxaGiro = entradas30d > 0 ? (saidas30d / entradas30d) * 100 : 0;
 
     const labels = summaryResult.rows.map((r: any) => r.material);
     const values = summaryResult.rows.map((r: any) => parseFloat(r.total || '0'));
@@ -343,7 +389,11 @@ export class DatabasePostgres {
         totalRecords: parseInt(statsResult.rows[0]?.total_records || '0'),
         totalEntradas: parseInt(statsResult.rows[0]?.total_entradas || '0'),
         totalSaidas: parseInt(statsResult.rows[0]?.total_saidas || '0'),
-        lowStock: parseInt(lowStockResult.rows[0]?.low_stock || '0')
+        lowStock: parseInt(lowStockResult.rows[0]?.low_stock || '0'),
+        totalValue: parseFloat(valorTotalResult.rows[0]?.valor_total || '0'),
+        materiaisAlerta: parseInt(lowStockResult.rows[0]?.low_stock || '0'),
+        taxaGiro: Math.round(taxaGiro),
+        materiaisZerados: parseInt(zeradosResult.rows[0]?.zerados || '0')
       }
     };
   }
