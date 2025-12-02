@@ -1,14 +1,14 @@
 {
   "name": "estoque-backend",
   "version": "1.0.0",
-  "main": "dist/server.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.js",
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "seed": "ts-node src/seed.ts",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "seed": "ts-node src/database/seed.ts",
     "seed:docker": "docker exec buildstock-backend npm run seed",
-    "reset": "ts-node src/reset-db.ts",
+    "reset": "ts-node src/database/reset.ts",
     "reset:docker": "docker exec buildstock-backend npm run reset"
   },
   "dependencies": {

@@ -1,18 +1,9 @@
+// Conexão e operações do banco de dados PostgreSQL
+// @ts-ignore - pg module is installed in node_modules
 import { Pool, PoolClient } from 'pg';
+import { databaseConfig } from '../config';
 
-// Configuração do PostgreSQL
-const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432'),
-  database: process.env.DB_NAME || 'buildstock',
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'postgres',
-  max: 20, // Máximo de conexões no pool
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-  // Configuração de encoding UTF-8
-  client_encoding: 'UTF8',
-});
+const pool = new Pool(databaseConfig);
 
 export class DatabasePostgres {
   private pool: Pool;
@@ -562,4 +553,4 @@ export class DatabasePostgres {
   }
 }
 
-export const dbPostgres = new DatabasePostgres();
+export const db = new DatabasePostgres();

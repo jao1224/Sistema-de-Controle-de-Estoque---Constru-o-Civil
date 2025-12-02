@@ -1,6 +1,6 @@
 // Reset - Limpar banco de dados
 
-import { dbPostgres } from './db';
+import { db as dbPostgres } from './connection';
 
 async function reset() {
   console.log('🗑️  Limpando banco de dados...\n');

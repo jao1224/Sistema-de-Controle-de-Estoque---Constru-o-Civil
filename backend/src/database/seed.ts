@@ -1,6 +1,6 @@
 // Seed - Popular banco de dados com dados de exemplo
 
-import { dbPostgres } from './db';
+import { db as dbPostgres } from './connection';
 
 async function seed() {
   console.log('🌱 Iniciando seed do banco de dados...\n');
