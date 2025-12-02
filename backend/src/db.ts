@@ -233,7 +233,7 @@ export class DatabasePostgres {
     );
 
     // Converter quantity de string para número
-    return result.rows.map(row => ({
+    return result.rows.map((row: any) => ({
       ...row,
       quantity: parseFloat(row.quantity)
     }));
@@ -264,7 +264,7 @@ export class DatabasePostgres {
     );
 
     // Converter valores numéricos de string para número
-    return result.rows.map(row => ({
+    return result.rows.map((row: any) => ({
       ...row,
       total: parseFloat(row.total),
       min_stock: parseFloat(row.min_stock),
@@ -393,7 +393,7 @@ export class DatabasePostgres {
     const values = summaryResult.rows.map((r: any) => parseFloat(r.total || '0'));
 
     // Converter quantity de string para número no latest
-    const latest = latestResult.rows.map(row => ({
+    const latest = latestResult.rows.map((row: any) => ({
       ...row,
       quantity: parseFloat(row.quantity)
     }));
