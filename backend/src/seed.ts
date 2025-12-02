@@ -45,25 +45,25 @@ async function seed() {
     console.log('\n📦 Criando materiais...');
     
     const materials = [
-      { name: 'Cimento', unit: 'saco', min_stock: 20, max_stock: 100, description: 'Cimento Portland CP-II' },
-      { name: 'Areia', unit: 'm³', min_stock: 10, max_stock: 50, description: 'Areia média lavada' },
-      { name: 'Brita', unit: 'm³', min_stock: 10, max_stock: 50, description: 'Brita 1' },
-      { name: 'Tijolo', unit: 'un', min_stock: 2000, max_stock: 10000, description: 'Tijolo cerâmico 6 furos' },
-      { name: 'Telha', unit: 'un', min_stock: 500, max_stock: 3000, description: 'Telha cerâmica colonial' },
-      { name: 'Ferro', unit: 'kg', min_stock: 50, max_stock: 500, description: 'Ferro CA-50 8mm' },
-      { name: 'Madeira', unit: 'm', min_stock: 100, max_stock: 500, description: 'Madeira pinus 3x3' },
-      { name: 'Tinta', unit: 'lata', min_stock: 10, max_stock: 100, description: 'Tinta acrílica branca 18L' },
-      { name: 'Cal', unit: 'saco', min_stock: 15, max_stock: 80, description: 'Cal hidratada' },
-      { name: 'Prego', unit: 'kg', min_stock: 5, max_stock: 50, description: 'Prego 18x30' },
+      { name: 'Cimento', unit: 'saco', min_stock: 20, max_stock: 100, price: 35.00, description: 'Cimento Portland CP-II' },
+      { name: 'Areia', unit: 'm³', min_stock: 10, max_stock: 50, price: 80.00, description: 'Areia média lavada' },
+      { name: 'Brita', unit: 'm³', min_stock: 10, max_stock: 50, price: 90.00, description: 'Brita 1' },
+      { name: 'Tijolo', unit: 'un', min_stock: 2000, max_stock: 10000, price: 0.80, description: 'Tijolo cerâmico 6 furos' },
+      { name: 'Telha', unit: 'un', min_stock: 500, max_stock: 3000, price: 3.50, description: 'Telha cerâmica colonial' },
+      { name: 'Ferro', unit: 'kg', min_stock: 50, max_stock: 500, price: 8.50, description: 'Ferro CA-50 8mm' },
+      { name: 'Madeira', unit: 'm', min_stock: 100, max_stock: 500, price: 12.00, description: 'Madeira pinus 3x3' },
+      { name: 'Tinta', unit: 'lata', min_stock: 10, max_stock: 100, price: 180.00, description: 'Tinta acrílica branca 18L' },
+      { name: 'Cal', unit: 'saco', min_stock: 15, max_stock: 80, price: 18.00, description: 'Cal hidratada' },
+      { name: 'Prego', unit: 'kg', min_stock: 5, max_stock: 50, price: 15.00, description: 'Prego 18x30' },
     ];
 
     for (const material of materials) {
       const result = await dbPostgres.query(
-        'INSERT INTO materials (name, unit, min_stock, max_stock, description) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (name) DO NOTHING RETURNING id',
-        [material.name, material.unit, material.min_stock, material.max_stock, material.description]
+        'INSERT INTO materials (name, unit, min_stock, max_stock, price, description) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (name) DO NOTHING RETURNING id',
+        [material.name, material.unit, material.min_stock, material.max_stock, material.price, material.description]
       );
       if (result.rows.length > 0) {
-        console.log(`   ✅ ${material.name} (${material.unit}) - Min: ${material.min_stock}, Max: ${material.max_stock}`);
+        console.log(`   ✅ ${material.name} (${material.unit}) - Min: ${material.min_stock}, Max: ${material.max_stock}, Preço: R$ ${material.price.toFixed(2)}`);
       } else {
         console.log(`   ⏭️  ${material.name} já existe`);
       }

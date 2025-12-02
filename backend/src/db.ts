@@ -10,6 +10,8 @@ const pool = new Pool({
   max: 20, // Máximo de conexões no pool
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
+  // Configuração de encoding UTF-8
+  client_encoding: 'UTF8',
 });
 
 export class DatabasePostgres {
@@ -45,10 +47,17 @@ export class DatabasePostgres {
           unit VARCHAR(50) DEFAULT 'un',
           min_stock DECIMAL(10,2) DEFAULT 0,
           max_stock DECIMAL(10,2),
+          price DECIMAL(10,2) DEFAULT 0,
           description TEXT,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           active BOOLEAN DEFAULT true
         )
+      `);
+
+      // Adicionar coluna price se não existir (para bancos existentes)
+      await client.query(`
+        ALTER TABLE materials 
+        ADD COLUMN IF NOT EXISTS price DECIMAL(10,2) DEFAULT 0
       `);
 
       // Tabela de Registros
@@ -114,7 +123,7 @@ export class DatabasePostgres {
     };
   }
 
-  async getOrCreateMaterial(name: string, unit: string = 'un'): Promise<number> {
+  async getOrCreateMaterial(name: string, unit: string = 'un', price: number = 0): Promise<number> {
     const client = await this.pool.connect();
     try {
       // Buscar material existente (case-insensitive)
@@ -124,13 +133,20 @@ export class DatabasePostgres {
       );
 
       if (result.rows.length > 0) {
+        // Se o material existe e um preço foi fornecido, atualizar o preço
+        if (price > 0) {
+          await client.query(
+            'UPDATE materials SET price = $1 WHERE id = $2',
+            [price, result.rows[0].id]
+          );
+        }
         return result.rows[0].id;
       }
 
       // Criar novo material
       const insertResult = await client.query(
-        'INSERT INTO materials (name, unit) VALUES ($1, $2) RETURNING id',
-        [name, unit]
+        'INSERT INTO materials (name, unit, price) VALUES ($1, $2, $3) RETURNING id',
+        [name, unit, price]
       );
 
       return insertResult.rows[0].id;
@@ -146,14 +162,15 @@ export class DatabasePostgres {
     userId: number | null = null,
     location?: string,
     message?: string,
-    unit?: string
+    unit?: string,
+    price?: number
   ): Promise<{ success: boolean; id?: number; error?: string }> {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
 
       // Obter ou criar material
-      const materialId = await this.getOrCreateMaterial(materialName, unit || 'un');
+      const materialId = await this.getOrCreateMaterial(materialName, unit || 'un', price || 0);
 
       // Validar estoque para saídas
       if (type === 'saida') {
@@ -231,6 +248,8 @@ export class DatabasePostgres {
         m.unit,
         m.min_stock,
         m.max_stock,
+        m.price,
+        m.description,
         MAX(sr.timestamp) as last_update,
         CASE 
           WHEN COALESCE(SUM(sr.quantity), 0) <= m.min_stock THEN 'baixo'
@@ -240,7 +259,7 @@ export class DatabasePostgres {
        FROM materials m
        LEFT JOIN stock_records sr ON m.id = sr.material_id
        WHERE m.active = true
-       GROUP BY m.id, m.name, m.unit, m.min_stock, m.max_stock
+       GROUP BY m.id, m.name, m.unit, m.min_stock, m.max_stock, m.price, m.description
        ORDER BY m.name`
     );
 
@@ -249,7 +268,8 @@ export class DatabasePostgres {
       ...row,
       total: parseFloat(row.total),
       min_stock: parseFloat(row.min_stock),
-      max_stock: row.max_stock ? parseFloat(row.max_stock) : null
+      max_stock: row.max_stock ? parseFloat(row.max_stock) : null,
+      price: row.price ? parseFloat(row.price) : 0
     }));
   }
 
@@ -263,6 +283,10 @@ export class DatabasePostgres {
       totalEntradas: number;
       totalSaidas: number;
       lowStock: number;
+      totalValue: number;
+      materiaisAlerta: number;
+      taxaGiro: number;
+      materiaisZerados: number;
     };
   }> {
     // Buscar resumo
@@ -319,9 +343,51 @@ export class DatabasePostgres {
          LEFT JOIN stock_records sr ON m.id = sr.material_id
          WHERE m.active = true
          GROUP BY m.id, m.min_stock
-         HAVING COALESCE(SUM(sr.quantity), 0) <= m.min_stock
+         HAVING COALESCE(SUM(sr.quantity), 0) <= m.min_stock AND COALESCE(SUM(sr.quantity), 0) > 0
        ) sub`
     );
+
+    // Contar materiais zerados
+    const zeradosResult = await this.pool.query(
+      `SELECT COUNT(*) as zerados
+       FROM (
+         SELECT 
+           m.id,
+           COALESCE(SUM(sr.quantity), 0) as total
+         FROM materials m
+         LEFT JOIN stock_records sr ON m.id = sr.material_id
+         WHERE m.active = true
+         GROUP BY m.id
+         HAVING COALESCE(SUM(sr.quantity), 0) <= 0
+       ) sub`
+    );
+
+    // Calcular valor total do estoque usando o preço de cada material
+    const valorTotalResult = await this.pool.query(
+      `SELECT COALESCE(SUM(total * price), 0) as valor_total
+       FROM (
+         SELECT 
+           m.price,
+           COALESCE(SUM(sr.quantity), 0) as total
+         FROM materials m
+         LEFT JOIN stock_records sr ON m.id = sr.material_id
+         WHERE m.active = true
+         GROUP BY m.id, m.price
+       ) sub`
+    );
+
+    // Calcular taxa de giro (últimos 30 dias)
+    const taxaGiroResult = await this.pool.query(
+      `SELECT 
+        COALESCE(SUM(CASE WHEN type = 'entrada' THEN quantity ELSE 0 END), 0) as entradas_30d,
+        COALESCE(SUM(CASE WHEN type = 'saida' THEN ABS(quantity) ELSE 0 END), 0) as saidas_30d
+       FROM stock_records
+       WHERE timestamp >= NOW() - INTERVAL '30 days'`
+    );
+
+    const entradas30d = parseFloat(taxaGiroResult.rows[0]?.entradas_30d || '0');
+    const saidas30d = parseFloat(taxaGiroResult.rows[0]?.saidas_30d || '0');
+    const taxaGiro = entradas30d > 0 ? (saidas30d / entradas30d) * 100 : 0;
 
     const labels = summaryResult.rows.map((r: any) => r.material);
     const values = summaryResult.rows.map((r: any) => parseFloat(r.total || '0'));
@@ -341,7 +407,11 @@ export class DatabasePostgres {
         totalRecords: parseInt(statsResult.rows[0]?.total_records || '0'),
         totalEntradas: parseInt(statsResult.rows[0]?.total_entradas || '0'),
         totalSaidas: parseInt(statsResult.rows[0]?.total_saidas || '0'),
-        lowStock: parseInt(lowStockResult.rows[0]?.low_stock || '0')
+        lowStock: parseInt(lowStockResult.rows[0]?.low_stock || '0'),
+        totalValue: parseFloat(valorTotalResult.rows[0]?.valor_total || '0'),
+        materiaisAlerta: parseInt(lowStockResult.rows[0]?.low_stock || '0'),
+        taxaGiro: Math.round(taxaGiro),
+        materiaisZerados: parseInt(zeradosResult.rows[0]?.zerados || '0')
       }
     };
   }
@@ -360,6 +430,37 @@ export class DatabasePostgres {
     return result.rows;
   }
 
+  async createMaterial(
+    name: string,
+    unit: string = 'un',
+    minStock: number = 0,
+    maxStock: number | null = null,
+    price: number = 0,
+    description: string = ''
+  ): Promise<{ success: boolean; id?: number; error?: string }> {
+    try {
+      // Verificar se já existe
+      const existing = await this.pool.query(
+        'SELECT id FROM materials WHERE LOWER(name) = LOWER($1)',
+        [name]
+      );
+
+      if (existing.rows.length > 0) {
+        return { success: false, error: 'Material já existe' };
+      }
+
+      // Criar material
+      const result = await this.pool.query(
+        'INSERT INTO materials (name, unit, min_stock, max_stock, price, description) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+        [name, unit, minStock, maxStock, price, description]
+      );
+
+      return { success: true, id: result.rows[0].id };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  }
+
   async updateMaterialLimits(
     materialId: number,
     minStock: number,
@@ -375,6 +476,76 @@ export class DatabasePostgres {
     }
 
     return { success: true };
+  }
+
+  async updateMaterial(
+    materialId: number,
+    name: string,
+    unit: string,
+    minStock: number,
+    maxStock: number | null,
+    price: number,
+    description: string
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      // Verificar se outro material já usa esse nome
+      const existing = await this.pool.query(
+        'SELECT id FROM materials WHERE LOWER(name) = LOWER($1) AND id != $2',
+        [name, materialId]
+      );
+
+      if (existing.rows.length > 0) {
+        return { success: false, error: 'Já existe outro material com esse nome' };
+      }
+
+      const result = await this.pool.query(
+        'UPDATE materials SET name = $1, unit = $2, min_stock = $3, max_stock = $4, price = $5, description = $6 WHERE id = $7',
+        [name, unit, minStock, maxStock, price, description, materialId]
+      );
+
+      if (result.rowCount === 0) {
+        return { success: false, error: 'Material não encontrado' };
+      }
+
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  }
+
+  async deleteMaterial(materialId: number): Promise<{ success: boolean; error?: string }> {
+    try {
+      // Verificar se tem registros associados
+      const records = await this.pool.query(
+        'SELECT COUNT(*) as count FROM stock_records WHERE material_id = $1',
+        [materialId]
+      );
+
+      const recordCount = parseInt(records.rows[0].count);
+
+      if (recordCount > 0) {
+        // Soft delete - apenas marca como inativo
+        await this.pool.query(
+          'UPDATE materials SET active = false WHERE id = $1',
+          [materialId]
+        );
+        return { success: true };
+      } else {
+        // Hard delete - remove completamente se não tem registros
+        const result = await this.pool.query(
+          'DELETE FROM materials WHERE id = $1',
+          [materialId]
+        );
+
+        if (result.rowCount === 0) {
+          return { success: false, error: 'Material não encontrado' };
+        }
+
+        return { success: true };
+      }
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
   }
 
   async close(): Promise<void> {
