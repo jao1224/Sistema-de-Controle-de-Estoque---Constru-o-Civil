@@ -442,8 +442,8 @@ export class DatabasePostgres {
 
       // Criar material
       const result = await this.pool.query(
-        'INSERT INTO materials (name, unit, min_stock, max_stock, price, description) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-        [name, unit, minStock, maxStock, price, description]
+        'INSERT INTO materials (name, unit, min_stock, max_stock, description, price) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+        [name, unit, minStock, maxStock, description, price]
       );
 
       return { success: true, id: result.rows[0].id };

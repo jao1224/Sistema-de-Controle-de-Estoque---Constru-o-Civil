@@ -6,14 +6,10 @@ import materialRoutes from './material.routes';
 
 const router = Router();
 
-// Rotas de estoque
-router.use('/stock', stockRoutes);
-router.use('/records', stockRoutes);
-router.use('/summary', stockRoutes);
-router.use('/materiais', stockRoutes);
-router.use('/dashboard-data', stockRoutes);
+// Rotas de estoque (todas começam com /api/)
+router.use('/', stockRoutes);
 
-// Rotas de materiais
+// Rotas de materiais (/api/materials)
 router.use('/materials', materialRoutes);
 
 export default router;

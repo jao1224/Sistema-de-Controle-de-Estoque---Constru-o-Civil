@@ -6,7 +6,7 @@ import { stockController } from '../controllers';
 const router = Router();
 
 // POST /api/stock - Criar novo registro
-router.post('/', (req, res) => stockController.createRecord(req, res));
+router.post('/stock', (req, res) => stockController.createRecord(req, res));
 
 // GET /api/records - Listar todos os registros
 router.get('/records', (req, res) => stockController.getAllRecords(req, res));

@@ -60,4 +60,4 @@ ENV NODE_ENV=production \
 
 # Comando para iniciar
 # Conecta ao PostgreSQL automaticamente
-CMD ["node", "dist/server.js"]
+CMD ["node", "dist/index.js"]
