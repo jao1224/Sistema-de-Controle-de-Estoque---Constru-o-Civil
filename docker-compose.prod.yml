@@ -1,0 +1,74 @@
+services:
+  # PostgreSQL Database - PRODUCTION
+  postgres:
+    image: postgres:16-alpine
+    container_name: buildstock-postgres-prod
+    environment:
+      POSTGRES_DB: buildstock_prod
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres123}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data-prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - buildstock-network-prod
+    restart: unless-stopped
+
+  # Backend API - PRODUCTION
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: buildstock-backend-prod
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=buildstock_prod
+      - DB_USER=postgres
+      - DB_PASSWORD=${DB_PASSWORD:-postgres123}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5000/api/summary || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - buildstock-network-prod
+
+  # Frontend - PRODUCTION
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: buildstock-frontend-prod
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - buildstock-network-prod
+
+networks:
+  buildstock-network-prod:
+    driver: bridge
+
+volumes:
+  postgres-data-prod:
+    driver: local
